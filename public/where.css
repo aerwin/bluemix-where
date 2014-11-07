@@ -1,0 +1,167 @@
+/* Copyright IBM Corp. 2014 All Rights Reserved                      */
+
+/* NOTE: Need to explicitly set height of all 
+   parent elements of the Leaflet container in order 
+   to make Leaflet map responsive. 
+*/
+
+html, body {
+	height: 100%;
+	background-color: #E1D8B7;
+	color: #23250e;
+}
+
+/************************************/
+/*        Where App Styles          */       
+/************************************/
+.whereMain {
+    height: 100%;
+}
+
+.whereMainRow {
+    height: 100%;
+}
+
+.whereMainRowInner {
+    height: 100%;
+}
+
+.leafletContainer {
+    height: 70%;
+    min-height: 200px;
+}
+
+.leaflet {
+	height: 100%;
+}
+
+.whereAmIInner {
+	min-height: 150px;
+}
+
+.whereAmIInner h5 {
+	margin-bottom: 3px;
+}
+
+.whereAmIInner address {
+	margin-bottom: 0px;
+}
+
+.whereAmIInner address > span {
+	display: block;
+}
+
+.whereCanIGoForm {
+	margin-top: 10px;
+}
+
+.whereHaveOthersBeen {
+	min-height: 200px;
+	/* background-color: #FFFAE9; */
+}
+
+/************************************/
+/*        Bootstrap Overrides       */       
+/************************************/
+.page-header {
+	margin-top: 0px;
+	/* AWE TODO border-color: #7D110C; */
+	border: none;
+	margin-bottom: 5px;
+}
+
+.page-header > h1 {
+	margin-top: 10px;
+	margin-bottom: 5px;
+}
+
+.page-header > h1 > img {
+	width: 32px;
+	height: 32px;
+	margin-right: 10px;
+}
+
+.page-header > h1> span {
+	vertical-align: middle;
+}
+
+.page-header > h3 {
+	margin-top: 0px;
+	margin-bottom: 10px;
+}
+
+.row {
+	margin-top: 10px;
+}
+
+fieldset.scheduler-border {
+    border: 1px groove #ddd !important;
+    padding: 0 1.4em 1.4em 1.4em !important;
+    margin: 0 0 1.5em 0 !important;
+    -webkit-box-shadow:  0px 0px 0px 0px #000;
+            box-shadow:  0px 0px 0px 0px #000;
+}
+
+legend.scheduler-border {
+    font-size: 1.2em !important;
+    font-weight: bold !important;
+    text-align: left !important;
+    width:inherit; /* Or auto */
+    padding:0 10px; /* To give a bit of padding on the left and right */
+    border-bottom:none;
+    margin-bottom: 5px;
+}
+
+.table-striped>tbody>tr:nth-child(odd)>td, .table-striped>tbody>tr:nth-child(odd)>th {
+	background-color: #FFFAE9; /* AWE TODO: was #f9f9f9; */
+}
+
+.table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td {
+	border: 1px solid #615e4f; /* AWE TODO: Was #ddd; */
+}
+
+.table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td {
+	border-top: 1px solid #615e4f; /* AWE TODO: Was #ddd; */
+}
+
+/* AWE TODO */
+.footer {
+	background-color: #f5f5f5;
+	min-height: 60px;
+	padding: 10px;
+}
+
+/**********************************************************************************************/
+/* Button Overrides (from http://twitterbootstrap3buttons.w3masters.nl/?color=%237D110C )     */
+/**********************************************************************************************/
+.btn-custom {
+	background-color: #7D110C;
+	border-color: #7D110C;
+	color: #FFFFFF;
+}
+
+.btn-custom:hover,
+.btn-custom:focus,
+.btn-custom:active,
+.btn-custom.active {
+	background-color: #660e0a;
+	border-color: #4e0b08;
+	color: #FFFFFF;
+}
+
+.btn-custom.disabled:hover,
+.btn-custom.disabled:focus,
+.btn-custom.disabled:active,
+.btn-custom.disabled.active,
+.btn-custom[disabled]:hover,
+.btn-custom[disabled]:focus,
+.btn-custom[disabled]:active,
+.btn-custom[disabled].active,
+fieldset[disabled] .btn-custom:hover,
+fieldset[disabled] .btn-custom:focus,
+fieldset[disabled] .btn-custom:active,
+fieldset[disabled] .btn-custom.active {
+	background-color: #7D110C;
+	border-color: #7D110C;
+	color: #FFFFFF;
+}

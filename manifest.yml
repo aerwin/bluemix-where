@@ -1,0 +1,15 @@
+applications:
+- name: bluemix-where
+
+  # using the random symbol will assign a unique hostname for this app
+  host: where-${random-word}
+  
+  command: node server.js
+
+  memory: 512M
+  
+  services:
+  - CloudantNoSQLDB
+  - TravelBoundary
+  - ReverseGeocoding
+  
