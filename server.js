@@ -5,10 +5,10 @@ var bodyParser = require('body-parser');
 var favicon = require('serve-favicon');
 
 // Router module will handle our REST API
-var router = require('./router');
+var router = require('./lib/router');
 
 // Bring in the module providing the wrapper for cf env
-var cfenv = require('./cfenv-wrapper');
+var cfenv = require('./lib/cfenv-wrapper');
 
 // Initialize the cfenv wrapper
 var appEnv = cfenv.getAppEnv();
