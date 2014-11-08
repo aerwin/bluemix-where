@@ -22,7 +22,7 @@ The code here is for an [IBM Bluemix](https://www.bluemix.net)-powered demo call
 	* [UI Bootstrap](http://angular-ui.github.io/bootstrap/)
 	* [Leaflet.js](http://leafletjs.com/) and [Angular Directive for Leaflet.js](https://github.com/tombatossals/angular-leaflet-directive)
 	* [Spin.js](http://fgnass.github.io/spin.js/) and [Angular Directive for Spin.js](https://github.com/urish/angular-spinner)
-
+	
 Client for Pebble Smartwatch
 ----------------------------
 A client for the Pebble Smartwatch is available in the separate [bluemix-where-pebble](https://github.com/aerwin/bluemix-where-pebble) repository. That code was written in JavaScript leveraging [Pebble.js](http://pebble.github.io/pebblejs/) and using the [CloudPebble IDE](https://cloudpebble.net/).
