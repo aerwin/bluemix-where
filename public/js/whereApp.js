@@ -34,7 +34,8 @@ whereApp.controller('WhereController', [
 				$scope.clearWhereAmIAlert();
 				
 				// Start a spinner over Where Am I? 
-				$scope.startSpin();
+				var spinnerId = 'whereAmI-spinner';
+				$scope.startSpin(spinnerId);
 				
 				geolocationService.getLocation().then(
 					function(position) {
@@ -69,15 +70,16 @@ whereApp.controller('WhereController', [
 					},
 					function(msg, code) {
 						// Show an error and stop the spinner
-						$scope.setWhereAmIAlert('danger', 'Error occurred getting geolocation.');
-						$scope.stopSpin();
+						$scope.setWhereAmIAlert('danger', msg);
+						$scope.stopSpin(spinnerId);
 					}
 				);
 			},
 
 			postGeolocation: function() {
 				// Start a spinner over Where Am I? 
-				$scope.startSpin();
+				var spinnerId = 'whereAmI-spinner';
+				$scope.startSpin(spinnerId);
 				
 				whereHttpService.postGeolocation($scope.currentCoordinates).then(
 					function(data) {
@@ -88,12 +90,12 @@ whereApp.controller('WhereController', [
 						$scope.updateWhereHaveOthersBeen();
 
 						// Stop the spinner
-						$scope.stopSpin();
+						$scope.stopSpin(spinnerId);
 					},
 					function(err) {
 						// Show an error and stop the spinner
-						$scope.setWhereAmIAlert('danger', 'Error occurred retrieving posting position to server.');
-						$scope.stopSpin();
+						$scope.setWhereAmIAlert('danger', 'Error occurred posting geolocation to server.');
+						$scope.stopSpin(spinnerId);
 					}
 				);
 			},
@@ -106,7 +108,8 @@ whereApp.controller('WhereController', [
 			
 			handleWhereCanIGo: function() {
 				// Start up a spinner
-				$scope.startSpinBoundary();
+				var spinnerId = 'whereCanIGo-spinner';
+				$scope.startSpin(spinnerId);
 				
 				// Clear out current boundary data
 				$scope.resetBoundaryData();
@@ -121,7 +124,7 @@ whereApp.controller('WhereController', [
 				whereHttpService.getTravelBoundary(currentLocationId, queryParams).then(
 					function(data) {
 						// Successfully got boundary so stop spinner
-						$scope.stopSpinBoundary();
+						$scope.stopSpin(spinnerId);
 
 						// Set the geojson properties for Leaflet
 						$scope.geojson = {
@@ -139,7 +142,7 @@ whereApp.controller('WhereController', [
 					function(err) {
 						// Show an error and stop the spinner
 						$scope.setWhereCanIGoAlert('danger', 'Error occurred retrieving travel boundary.');
-						$scope.stopSpinBoundary();
+						$scope.stopSpiny(spinnerId);
 					}
 				);
 			},
@@ -149,13 +152,18 @@ whereApp.controller('WhereController', [
 			 **********************************************************/
 			locationSummary: [],
 			updateWhereHaveOthersBeen: function(groupLevel) {
+				// Start up a spinner
+				var spinnerId = 'whereHaveOthersBeen-spinner';
+				$scope.startSpin(spinnerId);
+				
 				whereHttpService.getLocationSummary(groupLevel).then(
 					function(data) {
-						// Success, so store the summary
+						// Success, so stop spinner store the summary
+						$scope.stopSpin(spinnerId);
 						$scope.locationSummary = data;
 					},
 					function(err) {
-						// AWE TODO
+						$scope.stopSpin(spinnerId);
 					}
 				);
 			},
@@ -233,20 +241,15 @@ whereApp.controller('WhereController', [
 			/**************************************
 			 * Spinners
 			 **************************************/
-			startSpin: function() {
-				usSpinnerService.spin('whereAmI-spinner');
+			spinningSpinners: {},
+			startSpin: function(spinnerId) {
+				$scope.spinningSpinners[spinnerId] = true;
+				usSpinnerService.spin(spinnerId);
 			},
 
-			stopSpin: function() {
-				usSpinnerService.stop('whereAmI-spinner');
-			},
-			
-			startSpinBoundary: function() {
-				usSpinnerService.spin('whereCanIGo-spinner');
-			},
-
-			stopSpinBoundary: function() {
-				usSpinnerService.stop('whereCanIGo-spinner');
+			stopSpin: function(spinnerId) {
+				$scope.spinningSpinners[spinnerId] = false;
+				usSpinnerService.stop(spinnerId);
 			}
 		});
 		
@@ -255,3 +258,16 @@ whereApp.controller('WhereController', [
 		$scope.handleWhereAmI();
 	}
 ]);
+
+// Add a custom filter as Pitney Bowes addresses seems to
+// use three-letter country codes except when it comes to
+// the United States
+whereApp.filter('transformCountry', function () {
+	return function (countryName) {
+		if (countryName === 'United States of America') {
+			return 'USA';
+		} else {
+			return countryName;
+		}
+	};
+});

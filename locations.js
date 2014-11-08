@@ -3,9 +3,10 @@
 var Cloudant = require('cloudant');
 
 var DATABASE_NAME = 'where';
+var DESIGN_DOCUMENT_NAME = 'where-design';
 
 var cloudant;
-var locationDB;
+var whereDB;
 
 function getCloudant(credentials, callback) {
 	if (cloudant) {
@@ -23,9 +24,9 @@ function getCloudant(credentials, callback) {
 	}
 }
 
-function createIndex(locationDB, index, callback) {
+function createIndex(whereDB, index, callback) {
 	// Create the index
-	locationDB.index(index, function(err, response) {
+	whereDB.index(index, function(err, response) {
 		if (err) {
 			// Probably means index already created
 			console.error(err);
@@ -35,11 +36,10 @@ function createIndex(locationDB, index, callback) {
 	});
 }
 
-var DESIGN_DOCUMENT_NAME = 'where-design'; //AWE TODO
-function createIndices(locationDB, callback) {
+function createIndices(whereDB, callback) {
 	var indices = [{
 			// Index for userId and Time (time added so we can sort on it)
-			ddoc: DESIGN_DOCUMENT_NAME, //AWE TODO
+			ddoc: DESIGN_DOCUMENT_NAME, 
 			name: 'userId-time',
 			type: 'json',
 			index: {
@@ -68,7 +68,7 @@ function createIndices(locationDB, callback) {
 	var next = function(counter) {
 		if (counter < indices.length) {
 			var indexToCreate = indices[counter];
-			createIndex(locationDB, indexToCreate, function(response, err) {
+			createIndex(whereDB, indexToCreate, function(response, err) {
 				if (err) {
 					// Probably means index previously created
 					console.error(err);
@@ -86,8 +86,9 @@ function createIndices(locationDB, callback) {
 }
 
 function getDatabase(credentials, callback) {
-	if (locationDB) {
-		callback(null, locationDB);
+	if (whereDB) {
+		// Previouly initalized the DB, so we can do the callback immediately
+		callback(null, whereDB);
 	} else {
 		getCloudant(credentials, function(err, cloudant) {
 			if (!err) {
@@ -96,27 +97,26 @@ function getDatabase(credentials, callback) {
 					if (!createErr || createErr.error === 'file_exists') {
 						// Database created (or previously existed). Now, tell
 						// specify that we're going to use it.
-						locationDB = cloudant.use(DATABASE_NAME);
+						whereDB = cloudant.use(DATABASE_NAME);
 						
 						// We need to do a final piece of setup. We create the
 						// indices that will allow us to perform the queries
 						// we need to perform.
-						createIndices(locationDB, function(indexErr, indexResult) {
+						createIndices(whereDB, function(indexErr, indexResult) {
 							if (!indexErr) {
-								callback(null, locationDB);								
+								callback(null, whereDB);
 							} else {
-								// AWE TODO
+								console.error('Problem creating indices: ' + JSON.stringify(indexErr));
 								callback(indexErr, null);
 							}
 						});
 					} else {
-						// AWE TODO
-						console.error(JSON.stringify(createErr));
+						console.error('Problem creating database: ' + JSON.stringify(createErr));
 						callback(createErr, null);
 					}
 				});
 			} else {
-				// AWE TODO
+				console.error('Problem connecting to Cloudant: ' + JSON.stringify(err));
 				callback(err, null);
 			}
 		});

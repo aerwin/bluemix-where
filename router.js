@@ -15,47 +15,25 @@ var travelBoundary = pitneyBowes.getTravelBoundary(appEnv.getServiceCreds('Trave
 // Initialize the location manager
 var locationManager = locations.getLocationManager(appEnv.getServiceCreds('CloudantNoSQLDB'));
 
-//AWE TODO: This is kind of planning ahead
+// Constant for a user id to sort of plan ahead to 
+// adding authentication in the future.
 var USER_ID_ANONYMOUS = 'USER_ID_ANONYMOUS';
 
+// Constants for placing limites on some of the queries we'll support
 var LOCATIONS_LIMIT = 25;
 var GROUP_LEVEL_LIMIT = 3;
 
-// AWE TODO: Debate GET vs. POST
 function postLocation(req, res, next) {
-	// AWE TODO: should process other arguments?
-	console.log('POST LOCATION!!!'); //AWE TODO
+	console.log('postLocation START');
 	
-	/*//AWE TODO
-	if (!req.query.hasOwnProperty('latitude') || !req.query.hasOwnProperty('longitude')) {
-		// AWE TODO
-		res.statusCode = 400;
-		return res.json({
-			message: 'GET request must contain both latitude and longitude in query parameters.'
-		});
-	}
-
-	var query = {
-		latitude: req.query.latitude,
-		longitude: req.query.longitude
-		// AWE TODO: deal with search distance
-	};
-	*/
-	
-	// AWE TODO: should process other arguments?
-	console.log('POST LOCATION 2!!!'); //AWE TODO
-	
+	// Make sure we have at least latitude and longitude in the payload
 	if (!req.body.hasOwnProperty('latitude') || !req.body.hasOwnProperty('longitude')) {
-		// AWE TODO
 		res.statusCode = 400;
 		return res.json({
 			message: 'POST body must contain both latitude and longitude.'
 		});
 	}
 
-	// AWE TODO: should process other arguments?
-	console.log('POST LOCATION 3!!!'); //AWE TODO
-	
 	var query = {
 		latitude: req.body.latitude,
 		longitude: req.body.longitude,
@@ -64,13 +42,13 @@ function postLocation(req, res, next) {
 		deviceId: req.body.deviceId
 	};
 	
-	// AWE TODO: should process other arguments?
-	console.log('ABOUT TO GET ADDRESS!!! '); //AWE TODO
+	// Retrieve the address from Reverse Geocoding service
+	console.log('postLocation: Retrieving address from Reverse Geocoding...');
 	reverseGeocoding.getAddress(query, function(addressErr, addressResult) {
-		console.log('ADDRESS: ' + JSON.stringify(addressResult)); //AWE TODO
 		if (!addressErr) {
 			// Successfully got the address, so now let's create the
 			// location document in the DB
+			console.log('postLocation: SUCCESS getting address.');
 			var newLocationInfo = {
 				userId: USER_ID_ANONYMOUS,
 				time: new Date(),
@@ -88,25 +66,30 @@ function postLocation(req, res, next) {
 				user_agent: req.headers['user-agent']
 			};
 			
+			console.log('postLocation: Adding address to database.');
 			locationManager.insertLocation(newLocationInfo, function(locationErr, locationResult) {
-				console.log('^^^^^ INSERT LOCATION HANDLER!!!' + JSON.stringify(locationResult)); //AWE TODO
 				if (!locationErr) {
-					// Send response
+					// Send response back to client
+					console.log('postLocation: SUCCESS adding address to database.');
 					res.json(locationResult);
 				} else {
-					// Error storing address... pass the error along //AWE TODO: is this right thing
+					// Error storing address, so pass the error along
+					console.log('postLocation: FAILED adding address to database.');
 					next(locationErr);
 				}
 			});
 		} else {
-			// Error getting address... pass the error along //AWE TODO: is this right thing
+			// Error getting address, so pass the error along
+			console.log('postLocation: FAILED getting address from Reverse Geocoding.');
 			next(addressErr);
 		}
 	});
+	
+	console.log('postLocation END');
 }
 
 function getLocation(req, res, next) {
-	console.log('************ req.params = ' + JSON.stringify(req.params));
+	console.log('getLocation: START');
 	if (!req.params.hasOwnProperty('locationId')) {
 		res.statusCode = 400;
 		return res.json({
@@ -117,25 +100,28 @@ function getLocation(req, res, next) {
 	var query = {
 		locationId: req.params.locationId
 	};
-	// AWE TODO: should process other arguments?
-	console.log('ABOUT TO GET LOCATION!!!'); //AWE TODO
+	console.log('getLocation: Retrieve location from DB');
 	locationManager.getLocation(query, function(err, result) {
 		if (!err) {
+			// Successfully got the location from the DB
+			console.log('getLocation: SUCCESS retrieving location from DB');
 			res.json(result);
 		} else {
-			// Error getting address... pass the error along //AWE TODO: is this right thing
+			// Error getting location, so pass the error along
+			console.log('getLocation: FAILED retrieving location from DB');
 			next(err);
 		}
 	});
+	console.log('getLocation: END');
 }
 
 function getLocations(req, res, next) {
+	console.log('getLocations: START');
+	
 	// Make sure limit (if specified) is a number and in range
 	var limit;
-	console.log('%%%%%%%%%%%%%%%%% limit = ' + req.query.limit);
 	if (req.query.limit) {
 		limit = Number(req.query.limit);
-		console.log('%%%%%%%%%%%%%%%%% limit = ' + limit, ', typeof limit === "number" is ' + (typeof limit === 'number'));
 		if (typeof limit === 'number' && !isNaN(limit)) {
 			if (limit <= 0 || limit > LOCATIONS_LIMIT) {
 				res.statusCode = 400;
@@ -157,30 +143,29 @@ function getLocations(req, res, next) {
 		deviceId: req.query.deviceId,
 		limit: limit || LOCATIONS_LIMIT
 	};
-	// AWE TODO: should process other arguments?
-	console.log('ABOUT TO GET LOCATIONS!!! ' + JSON.stringify(query)); //AWE TODO
+	console.log('getLocations: RETRIEVING list of locations...');
 	locationManager.getLocations(query, function(err, result) {
-		// AWE TODO
 		if (!err) {
+			// Successfully found matching documents
 			var docs = result.docs;
-			console.log('router.getLocations -- Found %d documents matching selector', docs.length); //AWE TODO
-
+			console.log('getLocations: SUCCESS retrieving docs -- Found %d documents matching selector', docs.length);
 			res.json(docs);
 		} else {
-			// Error getting address... pass the error along //AWE TODO: is this right thing
-			console.log('\t!!!!! ERROR getting locations ' + JSON.stringify(err)); //AWE TODO
+			// Error getting locations, so pass the error along
+			console.log('getLocations: FAILED retrieving list of locations.');
 			next(err);
 		}
 	});
+	console.log('getLocations: END');
 }
 
 function getSummary(req, res, next) {
+	console.log('getSummary: START');
+	
 	// Make sure groupLevel (if specified) is a number and in range
 	var groupLevel;
-	console.log('%%%%%%%%%%%%%%%%% groupLevel = ' + req.query.groupLevel); //AWE TODO
 	if (req.query.groupLevel) {
 		groupLevel = Number(req.query.groupLevel);
-		console.log('%%%%%%%%%%%%%%%%% groupLevel = ' + groupLevel, ', typeof groupLevel === "number" is ' + (typeof groupLevel === 'number'));
 		if (typeof groupLevel === 'number' && !isNaN(groupLevel)) {
 			if (groupLevel < 0 || groupLevel > GROUP_LEVEL_LIMIT) {
 				res.statusCode = 400;
@@ -197,51 +182,57 @@ function getSummary(req, res, next) {
 	}
 	
 	// Get the summary
+	console.log('getSummary: Retrieving summary...');
 	var query = {
 		groupLevel: groupLevel || GROUP_LEVEL_LIMIT
 	};
-	console.log('ABOUT TO GET SUMMARY!!! ' + JSON.stringify(query)); //AWE TODO
 	locationManager.getSummary(query, function(err, result) {
-		// AWE TODO
 		if (!err) {
-			console.log('SUMMARY!!!', JSON.stringify(result)); //AWE TODO
+			console.log('getSummary: SUCCESS retrieving summary.');
 			res.json(result);
 		} else {
-			// Error getting address... pass the error along //AWE TODO: is this right thing
-			console.log('\t!!!!! ERROR getting locations ' + JSON.stringify(err)); //AWE TODO
+			// Error getting summary, so pass the error along
+			console.log('getSummary: FAILED retrieving summary.');
 			next(err);
 		}
 	});
+	
+	console.log('getSummary: END');
 }
 
 function getBoundary(req, res, next) {
+	console.log('getBoundary: START');
+	
+	// Make sure calling has included a location ID
 	if (!req.params.hasOwnProperty('locationId')) {
-		// AWE TODO
 		res.statusCode = 400;
 		return res.json({
 			message: 'GET request must contain locationId in the URL.'
 		});
 	}
 
+	// First look up the location entry
+	console.log('getBoundary: RETRIEVING location...');
 	var locationParams = {
 		locationId: req.params.locationId
 	};
 	locationManager.getLocation(locationParams, function(err, result) {
 		if (!err) {
+			console.log('getBoundary: SUCCESS getting location. Retrieving boundary...');
 			var query = {
 				latitude: result.latitude,
 				longitude: result.longitude,
 				cost: req.query.cost,
 				units: req.query.units
 			};
-			// AWE TODO: should process other arguments?
-			console.log('ABOUT TO GET BOUNDARY!!!'); //AWE TODO
-			travelBoundary.getBoundary(query, function(boundErr, boundResult) {
-				if (!boundErr) {
-					res.json(boundResult);
+			travelBoundary.getBoundary(query, function(boundaryErr, boundaryResult) {
+				if (!boundaryErr) {
+					console.log('getBoundary: SUCCESS getting boundary.');
+					res.json(boundaryResult);
 				} else {
 					// Error getting boundary, so pass error along
-					next(boundErr);
+					console.log('getBoundary: FAILED getting boundary.');
+					next(boundaryErr);
 				}
 			});
 		} else {
@@ -249,16 +240,17 @@ function getBoundary(req, res, next) {
 			next(err);
 		}
 	});
+	console.log('getBoundary: END');
 }
 
 // Export the router setup
 module.exports = (function() {
 	var router = express.Router();
 
-	//AWE TODO: think about API... should it be GET /check-ins/boundary or GET /check-ins/:id/boundary
+	// Define the routes for our API
 	router.post('/locations', postLocation);
 	router.get('/locations/summary', getSummary);
-	router.get('/locations/:locationId/boundary', getBoundary); //AWE TODO: Make this take a locationId
+	router.get('/locations/:locationId/boundary', getBoundary);
 	router.get('/locations/:locationId', getLocation);
 	router.get('/locations', getLocations);
 

@@ -4,9 +4,20 @@ var myModule = angular.module('whereHttp', []);
 myModule.factory('whereHttpService', function($q, $http, $log) {
 	return {
 		postGeolocation: function(coordinates) {
-			// Post the coordinates to the server
+			// Prepare the payload
+			var payload = {
+				latitude: coordinates.latitude,
+				longitude: coordinates.longitude,
+				altitude: coordinates.altitude,
+				accuracy: coordinates.accuracy,
+				altitudeAccuracy: coordinates.altitudeAccuracy,
+				heading: coordinates.heading,
+				speed: coordinates.speed
+			};
+			
+			// Post the payload to the server
 			var deferred = $q.defer();
-			$http.post('/api/locations', coordinates).
+			$http.post('/api/locations', payload).
 				success(function(data, status, headers, config) {
 					deferred.resolve(data);
 				}).
@@ -48,11 +59,7 @@ myModule.factory('whereHttpService', function($q, $http, $log) {
 				success(function(data, status, headers, config) {
 					// Sort the data
 					data.rows.sort(function(a, b) {
-						if (a.value === b.value) {
-							return 0;
-						} else {
-							return a.value < b.value;
-						}
+						return b.value - a.value;
 					});
 					
 					// Resolve with the sorted rows

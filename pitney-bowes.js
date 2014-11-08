@@ -5,22 +5,17 @@ var rest = require('restler');
 var extend = require('node.extend');
 var util = require('util');
 
-// AWE TODO: Needed to fix UNABLE_TO_VERIFY_LEAF_SIGNATURE when using https/tls connection
+// NOTE: Needed to fix UNABLE_TO_VERIFY_LEAF_SIGNATURE when using https/tls connection
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-// AWE TODO: example of response with a failed PB call
-/*
- { Output: 
- { Status: 'FAIL',
- StatusCode: 'Unable to Reverse Geocode',
- StatusDescription: 'Unable to Reverse Geocode' } }
- */
+// Default number of feet to use when querying for address based
+// on latitude/longitude
+var SEARCH_DISTANCE_DEFAULT = 1000;
 
 /**************************************************************
  *			Reverse Geocoding
  **************************************************************/
 function getReverseGeocoding(credentials) {
-	console.log('^^^^^^ credentials = ' + JSON.stringify(credentials)); //AWE TODO
 	if (!credentials) {
 		throw new TypeError('service credentials are required');
 	}
@@ -29,26 +24,21 @@ function getReverseGeocoding(credentials) {
 	var appId = credentials.appId;
 
 	return {
-		// Get addresses and chooses the first one
+		// Get addresses near to latitude and longitude. Then, choose the first one.
 		getAddress: function(query, callback) {
-			console.log('******** GET ADDRESS 1'); //AWE TODO
+			console.log('pitney-bowes.getAddress: START... retrieving address...');
 			this.getAddresses(query, function(err, result) {
-				console.log('\t******** GET ADDRESS 2'); //AWE TODO
 				if (!err) {
-					// AWE TODO: $$$$$$$$$$$$$
-					if (!result) {
-						// AWE TODO: Had a random time or two where result was null... seems like
-						// an error condition??
-						console.error('NO result!!!!!!');
-					}
-					
 					if (result && result.length > 0) {
+						console.log('pitney-bowes.getAddress: SUCCESS finding address');
 						callback(null, result[0]);
 					} else {
-						// AWE TODO: need to test this case
+						// No error returned, but no addresses either
+						console.log('pitney-bowes.getAddress: SUCCESS, but NO address');
 						callback(null, {});
 					}
 				} else{
+					console.log('pitney-bowes.getAddress: FAILED to get address');
 					callback(err, null);
 				}
 			});
@@ -56,42 +46,41 @@ function getReverseGeocoding(credentials) {
 		
 		getAddresses: function(query, callback) {
 			// Build up the params required by Reverse Geocoding API
+			console.log('pitney-bowes.getAddresses: START');
 			var options = {
 				query: {
 					appId: appId,
 					latitude: query.latitude,
 					longitude: query.longitude,
-					searchDistance: query.searchDistance || 1000 //AWE TODO: ??
+					searchDistance: query.searchDistance || SEARCH_DISTANCE_DEFAULT
 				}
 			};
 
-			// AWE TODO: Why does this call seem so slow??
 			// Make the call to the Reverse Geocoding API
+			console.log('pitney-bowes.getAddresses: Retrieving addresses...');
 			rest.get(url, options).on('complete', function(result) {
-				console.log('PITNEY BOWES RESPONSE!!!!'); //AWE TODO
+				console.log('pitney-bowes.getAddresses: Received Pitney Bowes response.');
 				if (result instanceof Error) {
-					// AWE TODO: handle error
-					console.error('Error:', result.message);
+					// We have an error...
+					console.error('pitney-bowes.getAddresses: Error:', result.message);
 					callback(result, null);
 				} else {
-					// AWE TODO: $$$$$$$$$$$$$
 					if (!result.Output) {
-						// AWE TODO: feels like we have an error condition if result.Output is null, but
-						// has happened a time or too
-						/* Saw this again on 10-13
-						 * 
-						 * NO result.Output, result = {"httpCode":"500","httpMessage":"Internal Server Error","moreInformati
-on":"Failed to establish a backside connection"}
-						*
-						 */
-						console.error('NO result.Output, result = ' + JSON.stringify(result));
+						// Occasionally see cases where there is an error embedded in the response, so
+						// gracefully handle:
+						//	
+						//		{"httpCode":"500","httpMessage":"Internal Server Error","moreInformation":"Failed to establish a backside connection"}
+
+						console.error('pitney-bowes.getAddresses: NO result.Output, result = ' + JSON.stringify(result));
 						callback(null, result);
 					} else {
+						console.log('pitney-bowes.getAddresses: SUCCESS getting addresses.');
 						var addresses = (result.Output && result.Output.Result) || [];
 						callback(null, addresses);
 					}
 				}
 			});
+			console.log('pitney-bowes.getAddresses: ENDT');
 		}
 	};
 }
@@ -99,35 +88,8 @@ on":"Failed to establish a backside connection"}
 /**************************************************************
  *			Travel Boundary
  **************************************************************/
-/*
- * AWE TODO: another example error
- 
- NO result.Output, result = {"httpCode
-":"500","httpMessage":"Internal Server Error","moreInformation":"Failed to estab
-lish a backside connection"}
-
- */
-
-/* AWE TODO
- {
-    "type": "Feature",
-    "properties": {"party": "Democrat"},
-    "geometry": {
-        "type": "Polygon",
-        "coordinates": [[
-            [-109.05, 41.00],
-            [-102.06, 40.99],
-            [-102.03, 36.99],
-            [-109.04, 36.99],
-            [-109.05, 41.00]
-        ]]
-    }
- */
 function _transformToGeoJSON(boundaryJSON, query) {
-	//Output.IsoPolygonResponse.Polygon.Exterior.LineString.Pos
-
-	util.format('%s:%s', 'foo'); // 'foo:%s'
-	
+	// Create the basic structure for the geojson
 	var points = [];
 	var name = 'Travel Boundary';
 	var description = util.format('%s: %d %s from %s, %s',
@@ -147,18 +109,15 @@ function _transformToGeoJSON(boundaryJSON, query) {
 		}]
 	};
 	
+	// Make sure we have good boundary JSON. Below is an example of output 
+	// for unsupported countries (like China)
+	//
+	//	Status: "FAIL", StatusCode: "Country not available", StatusDescription: "Country not available"
+	//
 	if (boundaryJSON && boundaryJSON.Output) {
-		// AWE TODO: should probably do more guarding here
+		// There seems to be good boundary output, so let's transform it. Probably 
+		// not the most elegant conversion routine, but works for a demo. :)
 		var output = boundaryJSON.Output;
-		
-		/* AWE TODO: deal with countries not available, like China
-		 * Status: "FAIL"
-StatusCode: "Country not available"
-StatusDescription: "Country not available"
-		 */
-		
-		// AWE TODO
-		// AWE TODO: don't like array in polygon
 		if (output.IsoPolygonResponse) {
 			if (output.IsoPolygonResponse.Polygon) {
 				if (output.IsoPolygonResponse.Polygon[0].Exterior) {
@@ -179,9 +138,7 @@ StatusDescription: "Country not available"
 	return geoJSON;
 }
 
-//TODO
 function getTravelBoundary(credentials) {
-	console.log('^^^^^^ credentials = ' + JSON.stringify(credentials)); //AWE TODO
 	if (!credentials) {
 		throw new TypeError('service credentials are required');
 	}
@@ -205,10 +162,15 @@ function getTravelBoundary(credentials) {
 		 */
 		getBoundary: function(options, callback) {
 			// Build up the params required by Reverse Geocoding API
+			console.log('pitney-bowes.getBoundary: START');
 			
-			//AWE TODO cost=10&units=Miles&majorRoads=Y&returnHoles=Y&returnIslands=Y&simplificationFactor=0.75
+			// Build up the params required by Reverse Geocoding API. The format of the URL is 
+			// of the form:
+			//
+			//		cost=10&units=Miles&majorRoads=Y&returnHoles=Y&returnIslands=Y&simplificationFactor=0.75
+			//
 			var defaults = {
-				// AWE TODO: think about the defaults
+				// AWE TODO: think about the defaults... haven't tried all of the params
 				cost: 5,
 				units: 'Minutes',
 				majorRoads: true,
@@ -216,32 +178,33 @@ function getTravelBoundary(credentials) {
 				returnIslands: false,
 				simplificationFactor: 0.75
 			};
+			
+			// Do a 'mixin' of the passed in options and the defaults, so
+			// that a caller doesn't have to specify everything
 			var query = extend(defaults, options, {appId: appId});
 	
 			var restOptions = {
 				query: query
 			};
 	
-			// AWE TODO: Why does this call seem so slow??
 			// Make the call to the Reverse Geocoding API
-			console.log('^^^^^^^^^^^^ travelBoundaryURL = ' + url + ', travelBoundaryAppId = ' + appId); //AWE TODO
+			console.log('pitney-bowes.getBoundary: Retrieving boundary...');
 			rest.get(url, restOptions).on('complete', function(result) {
-				console.log('PITNEY BOWES RESPONSE travelBoundary!!!!'); //AWE TODO
 				if (result instanceof Error) {
-					// AWE TODO: handle error
-					console.error('Error:', result.message);
+					// Failure...
+					console.error('pitney-bowes.getBoundary: Error:', result.message);
 					callback(result, {});
 				} else {
-					// AWE TODO: $$$$$$$$$$$$$
 					if (!result.Output) {
-						// AWE TODO: feels like we have an error condition if result.Output is null, but
-						// has happened a time or too
-						console.error('NO result.Output, result = ' + JSON.stringify(result));
+						// Seems like we have an error condition if result.Output is null, but
+						// has happened a time or two
+						console.error('pitney-bowes.getBoundary: NO result.Output, result = ' + JSON.stringify(result));
 					}
 	
-					//var addresses = (result.Output && result.Output.Result) || [];
-					// AWE TOOD: Want to convert this to GeoJSON
+					// Convert the result to GeoJSON
 					var geoJSON = _transformToGeoJSON(result, query);
+					
+					// Make the callback
 					callback(null, geoJSON);
 				}
 			});
@@ -249,26 +212,8 @@ function getTravelBoundary(credentials) {
 	};
 }
 
-/**************************************************************
- *			Validate Address
- **************************************************************/
-//TODO
-function getValidateAddress(credentials) {
-	return null;
-}
-
-/**************************************************************
- *			Geocoding
- **************************************************************/
-// TODO
-function getGeocoding(credentials) {
-	return null;
-}
-
-/**************************************************************
- *			Export Functions
- **************************************************************/
+/******************************************
+ *	Export Public Functions
+ ******************************************/
 module.exports.getReverseGeocoding = getReverseGeocoding;
 module.exports.getTravelBoundary = getTravelBoundary;
-module.exports.getGeocoding = getGeocoding;
-module.exports.getValidateAddress = getValidateAddress; //AWE TODO

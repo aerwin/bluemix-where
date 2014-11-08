@@ -5,6 +5,9 @@
    to make Leaflet map responsive. 
 */
 
+/************************************/
+/*       Overall html, body         */       
+/************************************/
 html, body {
 	height: 100%;
 	background-color: #E1D8B7;
@@ -27,7 +30,7 @@ html, body {
 }
 
 .leafletContainer {
-    height: 70%;
+    height: 85%;
     min-height: 200px;
 }
 
@@ -36,11 +39,16 @@ html, body {
 }
 
 .whereAmIInner {
-	min-height: 150px;
+	min-height: 127px;
+	margin-bottom: 15px;
 }
 
 .whereAmIInner h5 {
 	margin-bottom: 3px;
+}
+
+.whereAmICoordinates {
+	margin-top:10px;
 }
 
 .whereAmIInner address {
@@ -57,22 +65,28 @@ html, body {
 
 .whereHaveOthersBeen {
 	min-height: 200px;
-	/* background-color: #FFFAE9; */
+}
+
+.whereHaveOthersBeenInner table {
+	margin-top: 5px;
+	margin-bottom: 0px;
 }
 
 /************************************/
-/*        Bootstrap Overrides       */       
+/*       Bootstrap Overrides        */       
 /************************************/
 .page-header {
 	margin-top: 0px;
-	/* AWE TODO border-color: #7D110C; */
 	border: none;
 	margin-bottom: 5px;
+	vertical-align: bottom;
 }
 
 .page-header > h1 {
-	margin-top: 10px;
+	margin-top: 0px;
 	margin-bottom: 5px;
+	margin-right: 15px;
+	display: inline-block;
 }
 
 .page-header > h1 > img {
@@ -87,7 +101,8 @@ html, body {
 
 .page-header > h3 {
 	margin-top: 0px;
-	margin-bottom: 10px;
+	margin-bottom: 0px;
+	display: inline-block;
 }
 
 .row {
@@ -112,16 +127,8 @@ legend.scheduler-border {
     margin-bottom: 5px;
 }
 
-.table-striped>tbody>tr:nth-child(odd)>td, .table-striped>tbody>tr:nth-child(odd)>th {
-	background-color: #FFFAE9; /* AWE TODO: was #f9f9f9; */
-}
-
-.table-bordered>thead>tr>th, .table-bordered>tbody>tr>th, .table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td, .table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td {
-	border: 1px solid #615e4f; /* AWE TODO: Was #ddd; */
-}
-
 .table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td {
-	border-top: 1px solid #615e4f; /* AWE TODO: Was #ddd; */
+	border: none;
 }
 
 /* AWE TODO */

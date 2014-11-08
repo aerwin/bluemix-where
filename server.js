@@ -15,9 +15,9 @@ var appEnv = cfenv.getAppEnv();
 
 //Configure Express
 var app = express();
-app.use(bodyParser.json()); // needed to parse application/json //AWE TODO
+app.use(bodyParser.json()); // needed to parse application/json
 app.use(express.static(__dirname + '/public'));
-app.use(favicon(__dirname + '/public/images/bluemixGlobeColor32.png')); //AWE TODO
+app.use(favicon(__dirname + '/public/images/bluemixGlobeColor32.png'));
 
 // Register our router
 app.use('/api', router);
