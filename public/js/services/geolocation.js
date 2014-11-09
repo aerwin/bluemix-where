@@ -31,7 +31,11 @@ myModule.factory('geolocationService', function($q) {
 								msg = 'An unknown error occurred.';
 								break;
 						}
-						deferred.reject(msg);
+						deferred.reject({
+							data: {
+								message: msg
+							}
+						});
 					});
 			} else {
 				// Geolocation not supported, so reject deferred

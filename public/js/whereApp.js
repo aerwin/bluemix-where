@@ -68,9 +68,9 @@ whereApp.controller('WhereController', [
 						// We have a good geolocation, so post it to server
 						$scope.postGeolocation();
 					},
-					function(msg, code) {
+					function(err) {
 						// Show an error and stop the spinner
-						$scope.setWhereAmIAlert('danger', msg);
+						$scope.setWhereAmIAlert('danger', err.data.message);
 						$scope.stopSpin(spinnerId);
 					}
 				);
@@ -85,6 +85,14 @@ whereApp.controller('WhereController', [
 					function(data) {
 						// Post was successful for make note of the address data
 						$scope.currentLocation = data;
+						$scope.addressAvailable = data.address && Object.keys(data.address).length;
+						
+						// If there's no near by address, so let give user a message
+						// Show an error and stop the spinner
+						if (!$scope.addressAvailable) {
+							
+							$scope.setWhereAmIAlert('info', 'No nearby address.');
+						}
 
 						// Update the popular and recent lists because
 						// data just changed
@@ -115,6 +123,7 @@ whereApp.controller('WhereController', [
 				
 				// Clear out current boundary data
 				$scope.resetBoundaryData();
+				$scope.clearWhereCanIGoAlert();
 
 				// Prepare params and use whereHttpService to make
 				// the server call
@@ -143,8 +152,9 @@ whereApp.controller('WhereController', [
 					},
 					function(err) {
 						// Show an error and stop the spinner
-						$scope.setWhereCanIGoAlert('danger', 'Error occurred retrieving travel boundary.');
-						$scope.stopSpiny(spinnerId);
+						var message = err.data.message || 'Error occurred retrieving travel boundary.';
+						$scope.setWhereCanIGoAlert('danger', message);
+						$scope.stopSpin(spinnerId);
 					}
 				);
 			},
@@ -198,6 +208,7 @@ whereApp.controller('WhereController', [
 				// Address data
 				$scope.currentCoordinates = null;
 				$scope.currentLocation = null;
+				$scope.addressAvailable = false;
 				
 				// Leaflet data
 				$scope.resetBoundaryData();

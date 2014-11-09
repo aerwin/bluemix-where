@@ -62,6 +62,35 @@ html, body {
 	}
 }
 
+.whereAmIInner {
+	min-height: 125px;
+}
+
+.whereAmI fieldset {
+	height: 100%;
+}
+
+.whereAmI h5 {
+	margin-bottom: 3px;
+}
+
+.whereAmICoordinates {
+	margin-top:10px;
+}
+
+.whereAmI address {
+	margin-bottom: 0px;
+}
+
+.whereAmI address span {
+	display: block;
+}
+
+.whereAmI .btn {
+	margin-top: 10px;
+	float: bottom;
+}
+
 .whereCanIGo {
 	min-width: 210px;
 }
@@ -70,29 +99,13 @@ html, body {
 	white-space: nowrap;
 }
 
-.whereAmIInner {
-	min-height: 127px;
-	margin-bottom: 15px;
-}
-
-.whereAmIInner h5 {
-	margin-bottom: 3px;
-}
-
-.whereAmICoordinates {
-	margin-top:10px;
-}
-
-.whereAmIInner address {
-	margin-bottom: 0px;
-}
-
-.whereAmIInner address > span {
-	display: block;
-}
-
 .whereCanIGoForm {
 	margin-top: 10px;
+}
+
+.whereHaveOthersBeenInner,
+.whereIsMostPopularInner {
+	min-height: 150px;
 }
 
 .whereHaveOthersBeen {
@@ -186,11 +199,45 @@ legend.scheduler-border {
     vertical-align: top;
 }
 
-/* AWE TODO */
+@media screen and (max-width: 767px) {
+	.table-responsive>.table>thead>tr>th, 
+	.table-responsive>.table>tbody>tr>th, 
+	.table-responsive>.table>tfoot>tr>th, 
+	.table-responsive>.table>thead>tr>td, 
+	.table-responsive>.table>tbody>tr>td, 
+	.table-responsive>.table>tfoot>tr>td {
+		white-space: normal;
+	}
+}
+
 .footer {
-	background-color: #f5f5f5;
+	background-color: #7D110C;
+	color: white;
+	margin-bottom: 0px;
 	min-height: 60px;
-	padding: 10px;
+	padding: 10px 30px;	
+}
+
+.footer .right {
+	float:right;
+}
+
+@media screen and (max-width: 625px) {
+	.footer .right {
+		display: none;
+	}
+}
+
+.footer a {
+	color: #f8e5bd;
+}
+
+.footer a:visited {
+	color: #AEA79F;
+}
+
+.footer a:hover {
+	color: #E1D8B7;
 }
 
 /**********************************************************************************************/

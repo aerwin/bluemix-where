@@ -9,167 +9,200 @@
 </div>
 
 <div class="row row-centered whereMainRow">
-		<!-- The Leaflet Map -->
-		<div class="leafletContainer col-md-8">
-			<leaflet class="leaflet" markers="markers" center="mapCenter" tiles="tiles" geojson="geojson"></leaflet>
-		</div>
-		
-		<!-- Where Am I? -->
-		<div class="col-md-4 col-sm-6 col-xs-8 whereAmI">
-			<fieldset class="scheduler-border">
-				<legend class="scheduler-border">Where Am I?</legend>
-
-				<div class="whereAmIInner">
-				
-					<!-- Let's make a nice place to put any error/warning conditions. -->
-					<div class="col-md-12" ng-visible="whereAmIAlerts.length">
-						 <alert ng-repeat="alert in whereAmIAlerts" type="{{alert.type}}">{{alert.msg}}</alert>
-		  			</div>
-				
-					<div ng-show="currentCoordinates" class="whereAmICoordinates">
-						<h5>Geolocation</h5>
-						<span>{{currentCoordinates.latitude | number : 6}}, {{currentCoordinates.longitude | number : 6}}
-					</div> 
-					
-					<div ng-show="currentLocation.address">
-						<h5>Nearest Address ({{currentLocation.address.Distance}} feet)</h5>
-						<address>
-							<span ng-show="currentLocation.address.AddressLine1">{{currentLocation.address.AddressLine1}}</span>
-							<span ng-show="currentLocation.address.AddressLine2">{{currentLocation.address.AddressLine2}}</span>
-							<span ng-show="currentLocation.address.LastLine">{{currentLocation.address.LastLine}}</span>
-							<span ng-show="currentLocation.address.Country">{{currentLocation.address.Country}}</span>
-						</address>
-					</div>
-				</div>
-				
-				<button type="button" class="btn btn-custom btn-large center-block" 
-					ng-click="handleWhereAmI()" ng-disabled="!currentCoordinates">Update Location</button>
-				
-				<!-- Spinner for Where Am I? -->
-				<span us-spinner spinner-key="whereAmI-spinner"></span>
-			</fieldset>
-		</div>
-			
-		<!-- Where Can I Go? -->
-		<div class="col-md-4 col-sm-6 col-xs-4 whereCanIGo">
-			<fieldset class="scheduler-border" ng-disabled="!currentLocation.id || spinningSpinners['whereCanIGo-spinner']">
-				<legend class="scheduler-border">Where Can I Go?</legend>
-				
-				<!-- Let's make a nice place to put any error/warning conditions. -->
-				<div class="col-md-12" ng-visible="whereCanIGoAlerts.length">
-					 <alert ng-repeat="alert in whereCanIGoAlerts" type="{{alert.type}}">{{alert.msg}}</alert>
-	  			</div>
-		  			
-		  		<!-- Form area to specify "cost" to use when retrieving boundary. -->
-				<form class="form-horizontal whereCanIGoForm" role="form">
-  					<div class="form-group">
-						<label class="col-md-1 col-sm-1 control-label input-sm">Cost:</label>
-						<div class="col-md-11 col-sm-11">
-							<div class="col-lg-3 col-md-3 col-sm-3 col-xs-5 whereControlPaddingRight"> 
-								<input type="number" class="form-control input-sm"
-								      ng-model="boundaryCost" min="1" max="100" required="true"/>
-							</div>
-							<div class="col-lg-4 col-md-5 col-sm-4 col-xs-7 whereControlPaddingLeft"> 
-				  				<select ng-model="boundaryUnits" class="form-control input-sm"> 
-				  					<option value="Minutes">Minutes</option>
-				  					<option value="Miles">Miles</option>
-				  				</select>
-				  			</div>
-			  			</div>
-			  		</div>
-	  			
-		  			<div class="control-group">
-						<button type="button" class="btn btn-custom btn-large center-block" ng-click="handleWhereCanIGo()">
-							Find Out!
-						</button>
-					</div>
-				</form>
-			</fieldset>
-			
-			<!-- Spinner for where can I go? -->
-			<span us-spinner spinner-key="whereCanIGo-spinner"></span>
-		</div>
-		
-		<!-- Add the extra clearfix for only the required viewport -->
-		<div class="clearfix visible-sm-block"></div>
+	<!-- The Leaflet Map -->
+	<div class="leafletContainer col-md-8">
+		<leaflet class="leaflet" markers="markers" center="mapCenter" tiles="tiles" geojson="geojson"></leaflet>
+	</div>
 	
-		<!-- Where Is Most Popular? -->
-		<div class="col-md-4 col-sm-6 col-xs-12 whereIsMostPopular">
-			<fieldset class="scheduler-border">
-				<legend class="scheduler-border">Where Is Most Popular?</legend>
-				<div class="whereIsMostPopularInner">
-					<div class="table-responsive" ng-visible="locationSummary.length">
-						<table class="table table-condensed">
-							<thead>
-								<tr>
-									<th class="col-sm-1">Rank</th>
-						            <th class="col-sm-2">City & State/Province</th>
-						            <th class="col-sm-1">Country or Region</th>
-						            <th class="col-sm-1">Count</th>
-					            </tr>
-					        </thead>
-					        <tbody>
-								<tr data-ng-repeat="element in locationSummary">
-									<td>{{$index + 1}}</td>
-									<td>
-										<span>{{element.key[2]}}</span>
-										<span class="whereState">{{element.key[1]}}</span>
-									</td>
-									<td>{{element.key[0] | transformCountry }}</td>
-									<td>{{element.value}}</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
+	<!-- Where Am I? -->
+	<div class="col-md-4 col-sm-6 col-xs-8 whereAmI">
+		<fieldset class="scheduler-border">
+			<legend class="scheduler-border">Where Am I?</legend>
+			
+			<div class="whereAmIInner">
+				<!-- Let's make a nice place to put any error/warning conditions. -->
+				<div class="col-md-12" ng-show="whereAmIAlerts.length">
+					 <alert ng-repeat="alert in whereAmIAlerts" type="{{alert.type}}">{{alert.msg}}</alert>
+	  			</div>
+			
+				<div ng-show="currentCoordinates" class="whereAmICoordinates">
+					<h5>Geolocation</h5>
+					<span>{{currentCoordinates.latitude | number : 6}}, {{currentCoordinates.longitude | number : 6}}
+				</div> 
+				
+				<!-- Show address info if available -->
+				<div ng-show="addressAvailable" class="whereAddressContainer">
+					<h5>Nearest Address ({{currentLocation.address.Distance | number : 2}} feet)</h5>
+					<address>
+						<span ng-show="currentLocation.address.AddressLine1">{{currentLocation.address.AddressLine1}}</span>
+						<span ng-show="currentLocation.address.AddressLine2">{{currentLocation.address.AddressLine2}}</span>
+						
+						<span ng-show="currentLocation.address.Country === 'United States of America'">
+							<span ng-show="currentLocation.address.LastLine">{{currentLocation.address.LastLine}}</span>
+						</span>
+						
+						<!-- Special case non-U.S. addresses. I'm sure internationalization of non-U.S. addresses,
+								could be handled MUCH better. :) -->
+						<span ng-show="currentLocation.address.Country !== 'United States of America'">
+							<span ng-show="currentLocation.address.City">{{currentLocation.address.City}} {{currentLocation.address.PostalCode}}</span>
+							<span ng-show="currentLocation.address.StateProvince">{{currentLocation.address.StateProvince}}</span>
+						</span>
+						
+						<span ng-show="currentLocation.address.Country">{{currentLocation.address.Country}}</span>
+					</address>
 				</div>
-				<!-- Spinner for Where Have Others Been? -->
-				<span us-spinner spinner-key="whereIsMostPopular-spinner"></span>
-			</fieldset>
-		</div>
-		
-		<!-- Add the extra clearfix for only the required viewport -->
-		<div class="clearfix visible-xs-block"></div>
-		
-		<!-- Where Have Others Been Recently? -->
-		<div class="col-md-4 col-sm-6 whereHaveOthersBeen">
-			<fieldset class="scheduler-border">
-				<legend class="scheduler-border">Where Have Others Been Recently?</legend>
-				<div class="whereHaveOthersBeenInner">
-					<div class="table-responsive" ng-visible="recentLocations.length">
-						<table class="table table-condensed">
-							<thead>
-								<tr>
-									<th class="col-sm-1">When</th>
-						            <th class="col-sm-3">City & State/Province</th>
-						            <th class="col-sm-1">Country or Region</th>
-					            </tr>
-					        </thead>
-					        <tbody>
-								<tr data-ng-repeat="element in recentLocations">
-									<td>{{element.time | getTimeDifference }}</td>
-									<td>
-										<span>{{element.address.City}}</span>
-										<span class="whereState">{{element.address.StateProvince}}</span>
-									</td>
-									<td>{{element.address.Country | transformCountry }}</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
-				<!-- Spinner for Where Have Others Been? -->
-				<span us-spinner spinner-key="whereHaveOthersBeen-spinner"></span>
-			</fieldset>
-		</div>
-		
-		<!-- AWE TODO: Finish this later
-		<div class="footer col-md-12">
-			<div class="container">
-				<p class="text-muted">Client side built with: Angular, Bootstrap, Leaflet, etc.</p>
-				<p class="text-muted">Server side built with: Node, Express, Passport, etc.</p>
 			</div>
+
+			<!-- Update Locations Button -->	
+			<button type="button" class="btn btn-custom btn-large center-block" 
+				ng-click="handleWhereAmI()" ng-disabled="!currentCoordinates">Update Location</button>
+			
+			<!-- Spinner for Where Am I? -->
+			<span us-spinner spinner-key="whereAmI-spinner"></span>
+		</fieldset>
+	</div>
+		
+	<!-- Where Can I Go? -->
+	<div class="col-md-4 col-sm-6 col-xs-4 whereCanIGo">
+		<fieldset class="scheduler-border" ng-disabled="!currentLocation.id || spinningSpinners['whereCanIGo-spinner']">
+			<legend class="scheduler-border">Where Can I Go?</legend>
+			
+			<!-- Let's make a nice place to put any error/warning conditions. -->
+			<div class="col-md-12" ng-show="whereCanIGoAlerts.length">
+				 <alert ng-repeat="alert in whereCanIGoAlerts" type="{{alert.type}}">{{alert.msg}}</alert>
+  			</div>
+	  			
+	  		<!-- Form area to specify "cost" to use when retrieving boundary. -->
+			<form class="form-horizontal whereCanIGoForm" role="form">
+ 					<div class="form-group">
+					<label class="col-md-1 col-sm-1 control-label input-sm">Cost:</label>
+					<div class="col-md-11 col-sm-11">
+						<div class="col-lg-3 col-md-3 col-sm-3 col-xs-5 whereControlPaddingRight"> 
+							<input type="number" class="form-control input-sm"
+							      ng-model="boundaryCost" min="1" max="100" required="true"/>
+						</div>
+						<div class="col-lg-4 col-md-5 col-sm-4 col-xs-7 whereControlPaddingLeft"> 
+			  				<select ng-model="boundaryUnits" class="form-control input-sm"> 
+			  					<option value="Minutes">Minutes</option>
+			  					<option value="Miles">Miles</option>
+			  				</select>
+			  			</div>
+		  			</div>
+		  		</div>
+  			
+	  			<div class="control-group">
+					<button type="button" class="btn btn-custom btn-large center-block" ng-click="handleWhereCanIGo()">
+						Find Out!
+					</button>
+				</div>
+			</form>
+		</fieldset>
+		
+		<!-- Spinner for where can I go? -->
+		<span us-spinner spinner-key="whereCanIGo-spinner"></span>
+	</div>
+	
+	<!-- Add the extra clearfix for only the required viewport -->
+	<div class="clearfix visible-sm-block visible-md-block visible-lg-block"></div>
+
+	<!-- Where Is Most Popular? -->
+	<div class="col-md-6 col-sm-6 col-xs-12 whereIsMostPopular">
+		<fieldset class="scheduler-border">
+			<legend class="scheduler-border">Where Is Most Popular?</legend>
+			<div class="whereIsMostPopularInner">
+				<div class="table-responsive" ng-show="locationSummary.length">
+					<table class="table table-condensed">
+						<thead>
+							<tr>
+								<th class="col-sm-1">Rank</th>
+					            <th class="col-sm-2">City & State/Province</th>
+					            <th class="col-sm-1">Country / Region</th>
+					            <th class="col-sm-1">Count</th>
+				            </tr>
+				        </thead>
+				        <tbody>
+							<tr data-ng-repeat="element in locationSummary">
+								<td>{{$index + 1}}</td>
+								<td>
+									<span ng-show="element.key[2]">{{element.key[2]}}</span>
+									<span class="whereState" ng-show="element.key[1]">{{element.key[1]}}</span>
+								</td>
+								<td>{{element.key[0] | transformCountry }}</td>
+								<td>{{element.value}}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<!-- Spinner for Where Have Others Been? -->
+			<span us-spinner spinner-key="whereIsMostPopular-spinner"></span>
+		</fieldset>
+	</div>
+	
+	<!-- Add the extra clearfix for only the required viewport -->
+	<div class="clearfix visible-xs-block"></div>
+	
+	<!-- Where Have Others Been Recently? -->
+	<div class="col-md-6 col-sm-6 whereHaveOthersBeen">
+		<fieldset class="scheduler-border">
+			<legend class="scheduler-border">Where Have Others Been Recently?</legend>
+			<div class="whereHaveOthersBeenInner">
+				<div class="table-responsive" ng-show="recentLocations.length">
+					<table class="table table-condensed">
+						<thead>
+							<tr>
+								<th class="col-sm-1">When</th>
+					            <th class="col-sm-3">City & State/Province</th>
+					            <th class="col-sm-1">Country / Region</th>
+				            </tr>
+				        </thead>
+				        <tbody>
+							<tr data-ng-repeat="element in recentLocations">
+								<td>{{element.time | getTimeDifference }}</td>
+								<td>
+									<span>{{element.address.City}}</span>
+									<span class="whereState">{{element.address.StateProvince}}</span>
+									<!-- In case no address info -->
+									<span ng-show="!element.address.City && !element.address.StateProvince">--</span>
+								</td>
+								<td>
+									<span>{{element.address.Country | transformCountry }}</span>
+									<!-- In case no country -->
+									<span ng-show="!element.address.Country">--</span>	
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<!-- Spinner for Where Have Others Been? -->
+			<span us-spinner spinner-key="whereHaveOthersBeen-spinner"></span>
+		</fieldset>		
+	</div>
+	
+	<!-- Footer -->
+	<div class="row">
+		<div class="footer container col-xs-12 col-sm-12 col-md-12 col-lg-12">
+			<p class="right"><strong>Backend:</strong> 
+				<a target="_blank" href="http://nodejs.org/">Node</a>, 
+				<a target="_blank" href="http://expressjs.com/">Express</a>,
+				<a target="_blank" href="http://www.pb.com">Pitney Bowes</a>,
+				<a target="_blank" href="https://cloudant.com/">Cloudant</a>
+			</p>
+			<p><strong>Runs on:</strong> <a target="_blank" href="https://www.bluemix.net">IBM Bluemix</a>  
+					<strong>Code on:</strong> <a target="_blank" href="https://github.com/aerwin/bluemix-where">Github</a></p>
+			<p class="right"><strong>Frontend:</strong> 
+				<a target="_blank" href="https://angularjs.org/">AngularJS</a>, 
+				<a target="_blank" href="http://getbootstrap.com/">Bootstrap</a>, 
+				<a target="_blank" href="http://leafletjs.com/">Leaflet.js</a>, 
+				etc.
+			</p>
+			<p><strong>Pebble App:</strong>
+				<a target="_blank" href="pebble://appstore/545e9082a9ec3be830000006">mobile link</a> 
+				(or <a target="_blank" href="https://apps.getpebble.com/applications/545e9082a9ec3be830000006">desktop</a>)</p>
+			
 		</div>
-		-->
+	</div>
 </div>
 
 
