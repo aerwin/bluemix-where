@@ -22,20 +22,52 @@ html, body {
 }
 
 .whereMainRow {
-    height: 100%;
+	height: calc(100% - 200px);
 }
 
-.whereMainRowInner {
-    height: 100%;
+/* Small devices (tablets, 768px and up) */
+@media (min-width: 768px) { 
+	.whereMainRow {
+		height: calc(100% - 80px);
+	}
 }
 
 .leafletContainer {
-    height: 85%;
+    height: 100%;
     min-height: 200px;
+    margin-bottom: 15px;
 }
 
 .leaflet {
 	height: 100%;
+}
+
+.whereAmI,
+.whereCanIGo {	
+	/* Doesn't seem like this should be necessary, but these
+		divs seem to get covered up by the whereHaveOthersBeen
+		div in small device widths. */
+	z-index: 100000;
+}
+
+/* There might be a better way to do this, but 
+	there's a break point where whereAmI and
+	whereCanIGo no longer can fit on the same
+	line, and it makes sense to have them fill
+	up the whole space. */
+@media (max-width: 630px) { 
+	.whereAmI,
+	.whereCanIGo {
+		width: 100%;
+	}
+}
+
+.whereCanIGo {
+	min-width: 210px;
+}
+
+.whereCanIGo legend {
+	white-space: nowrap;
 }
 
 .whereAmIInner {
@@ -64,19 +96,32 @@ html, body {
 }
 
 .whereHaveOthersBeen {
-	min-height: 200px;
+	min-width: 380px;
 }
 
-.whereHaveOthersBeenInner table {
+.whereHaveOthersBeenInner table,
+.whereIsMostPopular table {
 	margin-top: 5px;
 	margin-bottom: 0px;
+}
+
+.whereControlPaddingRight {
+	padding-right: 2px;
+}
+
+.whereControlPaddingLeft {
+	padding-left: 2px;
+}
+
+.whereState {
+	display: block;
 }
 
 /************************************/
 /*       Bootstrap Overrides        */       
 /************************************/
 .page-header {
-	margin-top: 0px;
+	margin-top: 10px;
 	border: none;
 	margin-bottom: 5px;
 	vertical-align: bottom;
@@ -105,10 +150,6 @@ html, body {
 	display: inline-block;
 }
 
-.row {
-	margin-top: 10px;
-}
-
 fieldset.scheduler-border {
     border: 1px groove #ddd !important;
     padding: 0 1.4em 1.4em 1.4em !important;
@@ -120,7 +161,7 @@ fieldset.scheduler-border {
 legend.scheduler-border {
     font-size: 1.2em !important;
     font-weight: bold !important;
-    text-align: left !important;
+    text-align: center;
     width:inherit; /* Or auto */
     padding:0 10px; /* To give a bit of padding on the left and right */
     border-bottom:none;
@@ -129,6 +170,20 @@ legend.scheduler-border {
 
 .table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td {
 	border: none;
+}
+
+.table>thead>tr>th {
+	font-style: italic;
+	font-weight: normal;
+	border-bottom: 1px solid #AEA79F;
+}
+
+.table-responsive {
+	border: none;
+}
+
+.table>thead>tr>th {
+    vertical-align: top;
 }
 
 /* AWE TODO */

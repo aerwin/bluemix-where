@@ -86,7 +86,9 @@ whereApp.controller('WhereController', [
 						// Post was successful for make note of the address data
 						$scope.currentLocation = data;
 
-						// Update the location summary because rankings could change
+						// Update the popular and recent lists because
+						// data just changed
+						$scope.updateWhereIsMostPopular();
 						$scope.updateWhereHaveOthersBeen();
 
 						// Stop the spinner
@@ -148,12 +150,12 @@ whereApp.controller('WhereController', [
 			},
 			
 			/***********************************************************
-			 * Where have others been? -- location summary
+			 * Where is most popular? -- location summary
 			 **********************************************************/
 			locationSummary: [],
-			updateWhereHaveOthersBeen: function(groupLevel) {
+			updateWhereIsMostPopular: function(groupLevel) {
 				// Start up a spinner
-				var spinnerId = 'whereHaveOthersBeen-spinner';
+				var spinnerId = 'whereIsMostPopular-spinner';
 				$scope.startSpin(spinnerId);
 				
 				whereHttpService.getLocationSummary(groupLevel).then(
@@ -161,6 +163,27 @@ whereApp.controller('WhereController', [
 						// Success, so stop spinner store the summary
 						$scope.stopSpin(spinnerId);
 						$scope.locationSummary = data;
+					},
+					function(err) {
+						$scope.stopSpin(spinnerId);
+					}
+				);
+			},
+			
+			/***********************************************************
+			 * Where have others been? -- location summary
+			 **********************************************************/
+			recentLocations: [],
+			updateWhereHaveOthersBeen: function(groupLevel) {
+				// Start up a spinner
+				var spinnerId = 'whereHaveOthersBeen-spinner';
+				$scope.startSpin(spinnerId);
+				
+				whereHttpService.getRecentLocations().then(
+					function(data) {
+						// Success, so stop spinner store the summary
+						$scope.stopSpin(spinnerId);
+						$scope.recentLocations = data;
 					},
 					function(err) {
 						$scope.stopSpin(spinnerId);
@@ -256,6 +279,8 @@ whereApp.controller('WhereController', [
 		// Kick off getting the user's location and
 		// updating the display
 		$scope.handleWhereAmI();
+		$scope.updateWhereIsMostPopular();
+		$scope.updateWhereHaveOthersBeen();
 	}
 ]);
 
@@ -269,5 +294,42 @@ whereApp.filter('transformCountry', function () {
 		} else {
 			return countryName;
 		}
+	};
+});
+
+//Add a custom filter to convert a date/time to 
+// # of secs, minutes, hours, or days from current time
+whereApp.filter('getTimeDifference', function () {
+	function getTimeDifference(startDate, endDate) {
+		var retVal;
+			
+		var diff = endDate.getTime() - startDate.getTime();
+		var secs = diff / 1000;
+		if (secs < 60) {
+			retVal = Math.round(secs) + ' s';
+		} else {
+			var mins = secs / 60;
+			if (mins < 60) {
+				retVal = Math.round(mins) + ' m';
+			} else {
+				var hours = mins / 60;
+				if (hours < 24) {
+					retVal = Math.round(hours) + ' h';
+				} else {
+					var days = hours / 24;
+					if (days < 365) {
+						retVal = Math.round(days) + ' d';
+					}
+				}
+			}
+		}
+		
+		return retVal;
+	}
+	
+	return function (isoDateString) {
+		var startDate = new Date(isoDateString);
+		var endDate = new Date();
+		return getTimeDifference(startDate, endDate);
 	};
 });

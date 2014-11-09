@@ -1,21 +1,22 @@
 <!-- Copyright IBM Corp. 2014 All Rights Reserved -->
 
-<div class="row whereMainRow">
-	<div class="col-md-12 whereMainRowInner">	
-		<!-- Header -->
-		<div class="page-header col-md-12">
-  			<h1><img src="/images/bluemixGlobeColor32.png" / alt="Where? Logo"><span>Where?</span></h1>
-  			<h3><small>IBM Bluemix-powered demo helping to answer the "where" questions of life.</small></h3>
-		</div>
+<!-- Header -->
+<div class="row">
+	<div class="page-header col-md-12">
+		<h1><img src="/images/bluemixGlobeColor32.png" / alt="Where? Logo"><span>Where?</span></h1>
+		<h3><small>IBM Bluemix-powered demo helping to answer the "where" questions of life.</small></h3>
+	</div>
+</div>
 
+<div class="row row-centered whereMainRow">
 		<!-- The Leaflet Map -->
 		<div class="leafletContainer col-md-8">
 			<leaflet class="leaflet" markers="markers" center="mapCenter" tiles="tiles" geojson="geojson"></leaflet>
 		</div>
 		
 		<!-- Where Am I? -->
-		<div class="col-md-4">
-			<fieldset class="scheduler-border whereAmI">
+		<div class="col-md-4 col-sm-6 col-xs-8 whereAmI">
+			<fieldset class="scheduler-border">
 				<legend class="scheduler-border">Where Am I?</legend>
 
 				<div class="whereAmIInner">
@@ -50,7 +51,7 @@
 		</div>
 			
 		<!-- Where Can I Go? -->
-		<div class="col-md-4">
+		<div class="col-md-4 col-sm-6 col-xs-4 whereCanIGo">
 			<fieldset class="scheduler-border" ng-disabled="!currentLocation.id || spinningSpinners['whereCanIGo-spinner']">
 				<legend class="scheduler-border">Where Can I Go?</legend>
 				
@@ -62,14 +63,13 @@
 		  		<!-- Form area to specify "cost" to use when retrieving boundary. -->
 				<form class="form-horizontal whereCanIGoForm" role="form">
   					<div class="form-group">
-						<label class="col-sm-1 control-label input-sm">Cost:</label>
-						<div class="col-sm-11">
-							<div class="col-sm-5"> 
+						<label class="col-md-1 col-sm-1 control-label input-sm">Cost:</label>
+						<div class="col-md-11 col-sm-11">
+							<div class="col-lg-3 col-md-3 col-sm-3 col-xs-5 whereControlPaddingRight"> 
 								<input type="number" class="form-control input-sm"
 								      ng-model="boundaryCost" min="1" max="100" required="true"/>
 							</div>
-							
-							<div class="col-sm-7"> 
+							<div class="col-lg-4 col-md-5 col-sm-4 col-xs-7 whereControlPaddingLeft"> 
 				  				<select ng-model="boundaryUnits" class="form-control input-sm"> 
 				  					<option value="Minutes">Minutes</option>
 				  					<option value="Miles">Miles</option>
@@ -89,21 +89,71 @@
 			<!-- Spinner for where can I go? -->
 			<span us-spinner spinner-key="whereCanIGo-spinner"></span>
 		</div>
+		
+		<!-- Add the extra clearfix for only the required viewport -->
+		<div class="clearfix visible-sm-block"></div>
 	
-		<!-- Where Have Others Been? -->
-		<div class="col-md-4">
-			<fieldset class="scheduler-border whereHaveOthersBeen">
-				<legend class="scheduler-border">Where Have Others Been?</legend>
+		<!-- Where Is Most Popular? -->
+		<div class="col-md-4 col-sm-6 col-xs-12 whereIsMostPopular">
+			<fieldset class="scheduler-border">
+				<legend class="scheduler-border">Where Is Most Popular?</legend>
+				<div class="whereIsMostPopularInner">
+					<div class="table-responsive" ng-visible="locationSummary.length">
+						<table class="table table-condensed">
+							<thead>
+								<tr>
+									<th class="col-sm-1">Rank</th>
+						            <th class="col-sm-2">City & State/Province</th>
+						            <th class="col-sm-1">Country or Region</th>
+						            <th class="col-sm-1">Count</th>
+					            </tr>
+					        </thead>
+					        <tbody>
+								<tr data-ng-repeat="element in locationSummary">
+									<td>{{$index + 1}}</td>
+									<td>
+										<span>{{element.key[2]}}</span>
+										<span class="whereState">{{element.key[1]}}</span>
+									</td>
+									<td>{{element.key[0] | transformCountry }}</td>
+									<td>{{element.value}}</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<!-- Spinner for Where Have Others Been? -->
+				<span us-spinner spinner-key="whereIsMostPopular-spinner"></span>
+			</fieldset>
+		</div>
+		
+		<!-- Add the extra clearfix for only the required viewport -->
+		<div class="clearfix visible-xs-block"></div>
+		
+		<!-- Where Have Others Been Recently? -->
+		<div class="col-md-4 col-sm-6 whereHaveOthersBeen">
+			<fieldset class="scheduler-border">
+				<legend class="scheduler-border">Where Have Others Been Recently?</legend>
 				<div class="whereHaveOthersBeenInner">
-					<div class="table-responsive">
-						<table class="table">
-							<tr data-ng-repeat="element in locationSummary">
-								<td>{{$index + 1}}</td>
-								<td class="text-capitalize">{{element.key[2]}}</td>
-								<td>{{element.key[1]}}</td>
-								<td>{{element.key[0] | transformCountry }}</td>
-								<td class="text-center">{{element.value}}</td>
-							</tr>
+					<div class="table-responsive" ng-visible="recentLocations.length">
+						<table class="table table-condensed">
+							<thead>
+								<tr>
+									<th class="col-sm-1">When</th>
+						            <th class="col-sm-3">City & State/Province</th>
+						            <th class="col-sm-1">Country or Region</th>
+					            </tr>
+					        </thead>
+					        <tbody>
+								<tr data-ng-repeat="element in recentLocations">
+									<td>{{element.time | getTimeDifference }}</td>
+									<td>
+										<span>{{element.address.City}}</span>
+										<span class="whereState">{{element.address.StateProvince}}</span>
+									</td>
+									<td>{{element.address.Country | transformCountry }}</td>
+								</tr>
+							</tbody>
 						</table>
 					</div>
 				</div>
@@ -120,8 +170,6 @@
 			</div>
 		</div>
 		-->
-	
-	</div>
 </div>
 
 

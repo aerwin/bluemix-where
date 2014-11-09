@@ -16,16 +16,15 @@ myModule.factory('whereHttpService', function($q, $http, $log) {
 			};
 			
 			// Post the payload to the server
-			var deferred = $q.defer();
-			$http.post('/api/locations', payload).
-				success(function(data, status, headers, config) {
-					deferred.resolve(data);
-				}).
-				error(function(data, status, headers, config) {
-					$log.error(data);
-					deferred.reject(data);
+			var promise = $http.post('/api/locations', payload);
+			return promise.then(
+				function(result) {
+					return result.data;
+				},
+				function(err) {
+					$log.error(err);
+					return $q.reject(err);
 				});
-			return deferred.promise;
 		},
 
 		getTravelBoundary: function(currentLocationId, queryParams) {
@@ -34,16 +33,34 @@ myModule.factory('whereHttpService', function($q, $http, $log) {
 				params: queryParams
 			};
 			// Make server request
-			var deferred = $q.defer();
-			$http.get('/api/locations/' + currentLocationId + '/boundary', options).
-				success(function(data, status, headers, config) {
-					deferred.resolve(data);
-				}).
-				error(function(data, status, headers, config) {
-					$log.error(data);
-					deferred.reject(data);
+			var promise = $http.get('/api/locations/' + currentLocationId + '/boundary', options);
+			return promise.then(
+				function(result) {
+					return result.data;
+				},
+				function(err) {
+					$log.error(err);
+					return $q.reject(err);
 				});
-			return deferred.promise;
+		},
+		
+		getRecentLocations: function(limit) {
+			// Prepare data to send to server
+			var options = {
+				params: {
+					limit: limit || 10
+				}
+			};
+			// Make server request
+			var promise = $http.get('/api/locations/', options);
+			return promise.then(
+				function(result) {
+					return result.data;
+				},
+				function(err) {
+					$log.error(err);
+					return $q.reject(err);
+				});
 		},
 
 		getLocationSummary: function(groupLevel) {
@@ -54,22 +71,22 @@ myModule.factory('whereHttpService', function($q, $http, $log) {
 				}
 			};
 			// Make server request
-			var deferred = $q.defer();
-			$http.get('/api/locations/summary', options).
-				success(function(data, status, headers, config) {
+			var promise = $http.get('/api/locations/summary', options);
+			return promise.then(
+				function(result) {
 					// Sort the data
-					data.rows.sort(function(a, b) {
+					var rows = result.data.rows;
+					rows.sort(function(a, b) {
 						return b.value - a.value;
 					});
 					
 					// Resolve with the sorted rows
-					deferred.resolve(data.rows);
-				}).
-				error(function(data, status, headers, config) {
-					$log.error(data);
-					deferred.reject(data);
+					return rows;
+				},
+				function(err) {
+					$log.error(err);
+					return $q.reject(err);
 				});
-			return deferred.promise;
 		}
 	};
 });

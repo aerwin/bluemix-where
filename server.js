@@ -22,6 +22,13 @@ app.use(favicon(__dirname + '/public/images/bluemixGlobeColor32.png'));
 // Register our router
 app.use('/api', router);
 
+// Add a basic error handler
+app.use(function(err, req, res, next) {
+	console.error('ERROR: ' + JSON.stringify(err));
+	res.status(500);
+	res.send({message: err.message});
+});
+
 //start the server on the given port
 var server = app.listen(appEnv.port, function() {
     console.log('Server started on %d', server.address().port);
