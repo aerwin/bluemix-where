@@ -104,7 +104,7 @@ whereApp.controller('WhereController', [
 					},
 					function(err) {
 						// Show an error and stop the spinner
-						$scope.setWhereAmIAlert('danger', 'Error occurred posting geolocation to server.');
+						$scope.setWhereAmIAlert('danger', err.data.message || 'Error occurred posting geolocation to server.');
 						$scope.stopSpin(spinnerId);
 					}
 				);

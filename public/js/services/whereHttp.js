@@ -1,6 +1,9 @@
 /* Copyright IBM Corp. 2014 All Rights Reserved                      */
 
 var myModule = angular.module('whereHttp', []);
+
+var TIMEOUT = 60 * 1000; // 60 seconds
+
 myModule.factory('whereHttpService', function($q, $http, $log) {
 	return {
 		postGeolocation: function(coordinates) {
@@ -16,7 +19,7 @@ myModule.factory('whereHttpService', function($q, $http, $log) {
 			};
 			
 			// Post the payload to the server
-			var promise = $http.post('/api/locations', payload);
+			var promise = $http.post('/api/locations', payload, {timeout: TIMEOUT});
 			return promise.then(
 				function(result) {
 					return result.data;
