@@ -34,3 +34,6 @@ ssl
 
 # Misc files
 env.log
+
+# External JS/CSS resources
+public/external
