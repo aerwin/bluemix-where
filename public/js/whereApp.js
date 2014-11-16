@@ -168,12 +168,13 @@ whereApp.controller('WhereController', [
 			 * Where is most popular? -- location summary
 			 **********************************************************/
 			locationSummary: [],
-			updateWhereIsMostPopular: function(groupLevel) {
+			groupLevel: 1,
+			updateWhereIsMostPopular: function() {
 				// Start up a spinner
 				var spinnerId = 'whereIsMostPopular-spinner';
 				$scope.startSpin(spinnerId);
 				
-				whereHttpService.getLocationSummary(groupLevel).then(
+				whereHttpService.getLocationSummary($scope.groupLevel).then(
 					function(data) {
 						// Success, so stop spinner store the summary
 						$scope.stopSpin(spinnerId);
@@ -299,19 +300,6 @@ whereApp.controller('WhereController', [
 		$scope.updateWhereHaveOthersBeen();
 	}
 ]);
-
-// Add a custom filter as Pitney Bowes addresses seems to
-// use three-letter country codes except when it comes to
-// the United States
-whereApp.filter('transformCountry', function () {
-	return function (countryName) {
-		if (countryName === 'United States of America') {
-			return 'USA';
-		} else {
-			return countryName;
-		}
-	};
-});
 
 //Add a custom filter to convert a date/time to 
 // # of secs, minutes, hours, or days from current time

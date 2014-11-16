@@ -85,13 +85,8 @@ myModule.factory('whereHttpService', function($q, $http, $log) {
 			var promise = $http.get('/api/locations/summary', options);
 			return promise.then(
 				function(result) {
-					// Sort the data
+					// Resolve with rows
 					var rows = result.data.rows;
-					rows.sort(function(a, b) {
-						return b.value - a.value;
-					});
-					
-					// Resolve with the sorted rows
 					return rows;
 				},
 				function(err) {

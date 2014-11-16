@@ -37,18 +37,18 @@
 						<span ng-show="currentLocation.address.AddressLine1">{{currentLocation.address.AddressLine1}}</span>
 						<span ng-show="currentLocation.address.AddressLine2">{{currentLocation.address.AddressLine2}}</span>
 						
-						<span ng-show="currentLocation.address.Country === 'United States of America'">
+						<span ng-show="currentLocation.address.Country === 'USA'">
 							<span ng-show="currentLocation.address.LastLine">{{currentLocation.address.LastLine}}</span>
 						</span>
 						
 						<!-- Special case non-U.S. addresses. I'm sure internationalization of non-U.S. addresses,
 								could be handled MUCH better. :) -->
-						<span ng-show="currentLocation.address.Country !== 'United States of America'">
+						<span ng-show="currentLocation.address.Country !== 'USA'">
 							<span ng-show="currentLocation.address.City">{{currentLocation.address.City}} {{currentLocation.address.PostalCode}}</span>
 							<span ng-show="currentLocation.address.StateProvince">{{currentLocation.address.StateProvince}}</span>
 						</span>
 						
-						<span ng-show="currentLocation.address.Country">{{currentLocation.address.Country}}</span>
+						<span ng-show="currentLocation.address.Country">{{currentLocation.address.CountryName || currentLocation.address.Country}}</span>
 					</address>
 				</div>
 			</div>
@@ -114,20 +114,20 @@
 					<table class="table table-condensed">
 						<thead>
 							<tr>
-								<th class="col-sm-1">Rank</th>
-					            <th class="col-sm-2">City & State/Province</th>
-					            <th class="col-sm-1">Country / Region</th>
-					            <th class="col-sm-1">Count</th>
+								<th class="col-xs-1 col-sm-1 col-md-2 col-lg-2">Rank</th>
+					            <!-- <th ng-show="groupLevel > 1">City & State/Province</th> -->
+					            <th class="col-xs-9 col-sm-9 col-md-8 col-lg-8">Country / Region</th>
+					            <th class="col-xs-2 col-sm-2 col-md-2 col-lg-2">Count</th>
 				            </tr>
 				        </thead>
 				        <tbody>
 							<tr data-ng-repeat="element in locationSummary">
 								<td>{{$index + 1}}</td>
-								<td>
+								<!-- <td ng-show="groupLevel > 1">
 									<span ng-show="element.key[2]">{{element.key[2]}}</span>
 									<span class="whereState" ng-show="element.key[1]">{{element.key[1]}}</span>
-								</td>
-								<td>{{element.key[0] | transformCountry }}</td>
+								</td> -->
+								<td>{{(groupLevel === 1 && element.countryName) || element.key[0]}}</td>
 								<td>{{element.value}}</td>
 							</tr>
 						</tbody>
@@ -151,9 +151,9 @@
 					<table class="table table-condensed">
 						<thead>
 							<tr>
-								<th class="col-sm-1">When</th>
-					            <th class="col-sm-3">City & State/Province</th>
-					            <th class="col-sm-1">Country / Region</th>
+								<th class="col-xs-1 col-sm-1 col-md-2 col-lg-2">When</th>
+					            <th class="col-xs-7 col-sm-8 col-md-7 col-lg-7">City & State/Province</th>
+					            <th class="col-xs-4 col-sm-3 col-md-3 col-lg-3">Country / Region</th>
 				            </tr>
 				        </thead>
 				        <tbody>
@@ -166,7 +166,7 @@
 									<span ng-show="!element.address.City && !element.address.StateProvince">--</span>
 								</td>
 								<td>
-									<span>{{element.address.Country | transformCountry }}</span>
+									<span>{{element.address.CountryName || element.address.Country}}</span>
 									<!-- In case no country -->
 									<span ng-show="!element.address.Country">--</span>	
 								</td>
