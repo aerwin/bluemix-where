@@ -20,6 +20,7 @@ whereApp.controller('WhereController', [
 	'whereHttpService',
 	function($scope, $http, usSpinnerService, geolocationService, whereHttpService) {
 		var DEFAULT_ZOOM_LEVEL = 12;
+		var DEFAULT_SEARCH_DISTANCE = 750;
 		
 		angular.extend($scope, {
 
@@ -81,7 +82,11 @@ whereApp.controller('WhereController', [
 				var spinnerId = 'whereAmI-spinner';
 				$scope.startSpin(spinnerId);
 				
-				whereHttpService.postGeolocation($scope.currentCoordinates).then(
+				var options = {
+					searchDistance: DEFAULT_SEARCH_DISTANCE,
+					coordinates: $scope.currentCoordinates
+				};
+				whereHttpService.postGeolocation(options).then(
 					function(data) {
 						// Post was successful for make note of the address data
 						$scope.currentLocation = data;
@@ -90,8 +95,7 @@ whereApp.controller('WhereController', [
 						// If there's no near by address, so let give user a message
 						// Show an error and stop the spinner
 						if (!$scope.addressAvailable) {
-							
-							$scope.setWhereAmIAlert('info', 'No nearby address.');
+							$scope.setWhereAmIAlert('info', 'No address within ' + options.searchDistance + ' ft.');
 						}
 
 						// Update the popular and recent lists because

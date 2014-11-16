@@ -25,8 +25,12 @@ app.use('/api', router);
 // Add a basic error handler
 app.use(function(err, req, res, next) {
 	console.error('ERROR: ' + JSON.stringify(err));
+	var msg = err.message;
+	if (msg === 'AbortError') {
+		msg = 'Request to Pitney Bowes timed out. Please try again.';
+	}
 	res.status(500);
-	res.send({message: err.message});
+	res.send({message: msg});
 });
 
 //start the server on the given port

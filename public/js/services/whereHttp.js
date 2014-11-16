@@ -6,8 +6,9 @@ var TIMEOUT = 60 * 1000; // 60 seconds
 
 myModule.factory('whereHttpService', function($q, $http, $log) {
 	return {
-		postGeolocation: function(coordinates) {
+		postGeolocation: function(options) {
 			// Prepare the payload
+			var coordinates = options.coordinates;
 			var payload = {
 				latitude: coordinates.latitude,
 				longitude: coordinates.longitude,
@@ -15,7 +16,9 @@ myModule.factory('whereHttpService', function($q, $http, $log) {
 				accuracy: coordinates.accuracy,
 				altitudeAccuracy: coordinates.altitudeAccuracy,
 				heading: coordinates.heading,
-				speed: coordinates.speed
+				speed: coordinates.speed,
+				
+				searchDistance: options.searchDistance
 			};
 			
 			// Post the payload to the server
@@ -25,6 +28,11 @@ myModule.factory('whereHttpService', function($q, $http, $log) {
 					return result.data;
 				},
 				function(err) {
+					if (!err.data) {
+						err.data = {
+							message: 'Timeout occurred. Please try again.'
+						};
+					}
 					$log.error(err);
 					return $q.reject(err);
 				});
