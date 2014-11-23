@@ -9,11 +9,11 @@
     "country-data": "0.0.14",
     "express": "^4.9.5",
     "fs-sync": "^0.2.5",
+    "geolib": "^2.0.14",
     "node.extend": "^1.1.2",
     "properties-parser": "^0.2.3",
     "restler": "^3.2.2",
-    "serve-favicon": "^2.1.5",
-    "util": "^0.10.3"
+    "serve-favicon": "^2.1.5"
   },
   "author": "Tony Erwin",
   "license": "Apache License, Version 2.0"

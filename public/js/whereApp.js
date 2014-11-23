@@ -71,7 +71,7 @@ whereApp.controller('WhereController', [
 					},
 					function(err) {
 						// Show an error and stop the spinner
-						$scope.setWhereAmIAlert('danger', err.data.message);
+						$scope.setWhereAmIAlert('danger', (err.data && err.data.message));
 						$scope.stopSpin(spinnerId);
 					}
 				);
@@ -157,7 +157,7 @@ whereApp.controller('WhereController', [
 					},
 					function(err) {
 						// Show an error and stop the spinner
-						var message = err.data.message || 'Error occurred retrieving travel boundary.';
+						var message = (err.data && err.data.message) || 'Error occurred retrieving travel boundary.';
 						$scope.setWhereCanIGoAlert('danger', message);
 						$scope.stopSpin(spinnerId);
 					}

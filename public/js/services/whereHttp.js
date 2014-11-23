@@ -41,7 +41,8 @@ myModule.factory('whereHttpService', function($q, $http, $log) {
 		getTravelBoundary: function(currentLocationId, queryParams) {
 			// Prepare data to send to server
 			var options = {
-				params: queryParams
+				params: queryParams,
+				timeout: TIMEOUT
 			};
 			// Make server request
 			var promise = $http.get('/api/locations/' + currentLocationId + '/boundary', options);
@@ -50,6 +51,11 @@ myModule.factory('whereHttpService', function($q, $http, $log) {
 					return result.data;
 				},
 				function(err) {
+					if (!err.data) {
+						err.data = {
+							message: 'Timeout occurred. Please try again.'
+						};
+					}
 					$log.error(err);
 					return $q.reject(err);
 				});
