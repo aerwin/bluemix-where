@@ -26,6 +26,11 @@ The code here is for an [IBM Bluemix](https://www.bluemix.net)-powered demo call
 Client for Pebble Smartwatch
 ----------------------------
 A client for the Pebble Smartwatch is available in the separate [bluemix-where-pebble](https://github.com/aerwin/bluemix-where-pebble) repository. That code was written in JavaScript leveraging [Pebble.js](http://pebble.github.io/pebblejs/) and using the [CloudPebble IDE](https://cloudpebble.net/).
+Tutorial
+===================
+A tutorial for using the code in this repository is available on IBM developerWorks:
+
+* [*Build a Where? app for web and Pebble users*](http://www.ibm.com/developerworks/library/mo-pebble-where-app/index.html)
 
 License
 ===================
