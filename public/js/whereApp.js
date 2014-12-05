@@ -21,6 +21,7 @@ whereApp.controller('WhereController', [
 	function($scope, $http, usSpinnerService, geolocationService, whereHttpService) {
 		var DEFAULT_ZOOM_LEVEL = 12;
 		var DEFAULT_SEARCH_DISTANCE = 750;
+		var WHERE_HAVE_OTHERS_BEEN_LIMIT = 15;
 		
 		angular.extend($scope, {
 
@@ -195,7 +196,7 @@ whereApp.controller('WhereController', [
 				var spinnerId = 'whereHaveOthersBeen-spinner';
 				$scope.startSpin(spinnerId);
 				
-				whereHttpService.getRecentLocations().then(
+				whereHttpService.getRecentLocations(WHERE_HAVE_OTHERS_BEEN_LIMIT).then(
 					function(data) {
 						// Success, so stop spinner store the summary
 						$scope.stopSpin(spinnerId);
