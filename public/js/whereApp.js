@@ -356,6 +356,7 @@ whereApp.controller('UsageController', [
 	'usSpinnerService',
 	'whereHttpService',
 	function($scope, usSpinnerService, whereHttpService) {
+		var CHART_COLOR_SERIES_1 = '#7D110C';
 		
 		// Utility for building time chart options
 		function getTimeChartOptions(yKey, yLabel) {
@@ -372,10 +373,11 @@ whereApp.controller('UsageController', [
 				series: [{
 					y: yKey,
 					label: yLabel,
-					color: '#0970CA',
+					color: CHART_COLOR_SERIES_1,
 					axis: 'y',
 					type: 'line',
 					thickness: '1px',
+					dotSize: '1px',
 					id: 'series_0'
 				}],
 				tooltip: {
@@ -414,7 +416,7 @@ whereApp.controller('UsageController', [
 					y: yKey,
 					label: yLabel,
 					type: 'column',
-					color: '#0970CA',
+					color: CHART_COLOR_SERIES_1,
 					axis: 'y'
 				}],
 				tooltip: {
