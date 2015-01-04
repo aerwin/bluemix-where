@@ -1,24 +1,30 @@
 /* Copyright IBM Corp. 2014 All Rights Reserved                      */
 
 var whereApp = angular.module('whereApp', [
-	'ui.bootstrap', 'ngRoute', 'leaflet-directive', 'angularSpinner', 'geolocation', 'whereHttp'
+	'ui.bootstrap', 'ngRoute', 'leaflet-directive', 'angularSpinner', 'n3-line-chart', 'geolocation', 'whereHttp'
 ]).config([
     // Make use of the where.html partial
 	'$routeProvider', function($routeProvider) {
-		$routeProvider.otherwise({
-			controller: 'WhereController',
-			templateUrl: '/partials/where.html'
+		$routeProvider.when('/where', {
+			templateUrl: '/partials/where.html',
+			controller: 'WhereController'
+		}).
+		when('/usage', {
+			templateUrl: 'partials/usage.html',
+			controller: 'UsageController'
+		}).
+		otherwise({
+			redirectTo: '/where'
 		});
 	}
 ]);
 
 whereApp.controller('WhereController', [
 	'$scope',
-	'$http',
 	'usSpinnerService',
 	'geolocationService',
 	'whereHttpService',
-	function($scope, $http, usSpinnerService, geolocationService, whereHttpService) {
+	function($scope, usSpinnerService, geolocationService, whereHttpService) {
 		var DEFAULT_ZOOM_LEVEL = 12;
 		var DEFAULT_SEARCH_DISTANCE = 750;
 		var WHERE_HAVE_OTHERS_BEEN_LIMIT = 15;
@@ -264,6 +270,9 @@ whereApp.controller('WhereController', [
 				}
 			},
 			
+			/************************************************
+			 * Where Can I Go? --  Alerts
+			 ************************************************/
 			whereCanIGoAlerts: [],
 			setWhereCanIGoAlert: function(type, msg) {
 				var newAlert = {type: type, msg: msg};
@@ -338,3 +347,157 @@ whereApp.filter('getTimeDifference', function () {
 		return getTimeDifference(startDate, endDate);
 	};
 });
+
+/***************************************************
+ * Controller for Usage View
+ ***************************************************/
+whereApp.controller('UsageController', [
+	'$scope',
+	'usSpinnerService',
+	'whereHttpService',
+	function($scope, usSpinnerService, whereHttpService) {
+		
+		// Utility for building time chart options
+		function getTimeChartOptions(yKey, yLabel) {
+			var options = {
+				axes: {
+					x: {
+						type: 'date',
+						key: 'date'
+					},
+					y: {
+						type: 'linear'
+					}
+				},
+				series: [{
+					y: yKey,
+					label: yLabel,
+					color: '#0970CA',
+					axis: 'y',
+					type: 'line',
+					thickness: '1px',
+					id: 'series_0'
+				}],
+				tooltip: {
+					mode: 'scrubber',
+					formatter: function (x, y, series) {
+						return x.toLocaleDateString() + ' : ' + y;
+					}
+				},
+				stacks: [],
+				lineMode: 'linear',
+				tension: 0.7,
+				drawLegend: false,
+				drawDots: true,
+				columnsHGap: 5
+			};
+			return options;
+		}
+		
+		// Utility for building bar chart options
+		function getBarChartOptions(yKey, yLabel, xLabelFunction) {
+			var options = {
+				axes: {
+					x: {
+						type: 'linear',
+						key: 'x',
+						labelFunction: function(x) {
+							return xLabelFunction(x);
+						}
+					},
+					y: {
+						type: 'linear'
+					}
+				},
+				series: [{
+					id: 'id_0',
+					y: yKey,
+					label: yLabel,
+					type: 'column',
+					color: '#0970CA',
+					axis: 'y'
+				}],
+				tooltip: {
+					mode: 'scrubber',
+					formatter: function (x, y, series) {
+						return xLabelFunction(x) + ' : ' + y;
+					}
+				},
+				stacks: [],
+				lineMode: 'cardinal',
+				tension: 0.7,
+				drawLegend: false,
+				drawDots: true,
+				columnsHGap: 5
+			};
+			return options;
+		}
+		
+		angular.extend($scope, {
+			// Construct options for the various charts
+			usageChartOptions: getTimeChartOptions('total', 'Total Locations'),
+			usagePerDayChartOptions: getTimeChartOptions('value', 'Locations Per Day'),
+			usageByDeviceChartOptions: getBarChartOptions('value', 'Locations by Device',
+				// Custom function to map x-axis value to label
+				function(x) {
+					var usageByDevice = $scope.usageByDevice;
+					if (x % 1 === 0 && x >= 0 && x < usageByDevice.length) {
+						// We have an integer
+						var usageItem = usageByDevice[x];
+						return usageItem.key[0];
+					}
+				}
+			),
+			
+			/***********************************************************
+			 * Usage Data by Time
+			 **********************************************************/
+			usageByTime: [],
+			usageyByTimeTotal: 0,
+			usageGroupLevel: 3,
+			updateUsageByTime: function() {
+				whereHttpService.getLocationSummaryByTime($scope.usageGroupLevel).then(
+					function(usageData) {
+						// Need to massage the data for use by chart
+						var usageDataTotal = 0;
+						usageData.forEach(function(item) {
+							var year = item.key[0];
+							var month = item.key[1];
+							var day = item.key[2];
+							usageDataTotal += item.value;
+							
+							item.date = new Date(year, month, day);
+							item.total = usageDataTotal;
+							
+						});
+						
+						$scope.usageByTime = usageData;
+						$scope.usageyByTimeTotal = usageDataTotal;
+					}
+				);
+			},
+			
+			/***********************************************************
+			 * Usage Data by Device
+			 **********************************************************/
+			usageByDevice: [],
+			usageByDeviceGroupLevel: 1,
+			updateUsageByDevice: function() {
+				whereHttpService.getLocationSummaryByDevice($scope.usageByDeviceGroupLevel).then(
+					function(usageData) {
+						// Need to massage the data for use by chart
+						usageData.forEach(function(item, index) {
+							item.x = index;
+						});
+
+						$scope.usageByDevice = usageData;
+					}
+				);
+			}
+		});
+		
+		// Kick off getting (and displaying) some usage info
+		$scope.updateUsageByTime();
+		$scope.updateUsageByDevice();
+	}
+]);

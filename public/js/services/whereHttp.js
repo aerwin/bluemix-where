@@ -99,6 +99,48 @@ myModule.factory('whereHttpService', function($q, $http, $log) {
 					$log.error(err);
 					return $q.reject(err);
 				});
+		},
+		
+		getLocationSummaryByTime: function(groupLevel) {
+			// Prepare data to send to server
+			var options = {
+				params: {
+					groupLevel: groupLevel || 3
+				}
+			};
+			// Make server request
+			var promise = $http.get('/api/locations/summary/time', options);
+			return promise.then(
+				function(result) {
+					// Resolve with rows
+					var rows = result.data.rows;
+					return rows;
+				},
+				function(err) {
+					$log.error(err);
+					return $q.reject(err);
+				});
+		},
+		
+		getLocationSummaryByDevice: function(groupLevel) {
+			// Prepare data to send to server
+			var options = {
+				params: {
+					groupLevel: groupLevel || 2
+				}
+			};
+			// Make server request
+			var promise = $http.get('/api/locations/summary/device', options);
+			return promise.then(
+				function(result) {
+					// Resolve with rows
+					var rows = result.data.rows;
+					return rows;
+				},
+				function(err) {
+					$log.error(err);
+					return $q.reject(err);
+				});
 		}
 	};
 });

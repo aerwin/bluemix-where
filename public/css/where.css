@@ -11,6 +11,9 @@
 html, body {
 	height: 100%;
 	background-color: #E1D8B7;
+}
+
+html, body, h1, h2, h3, h4, h5, h6 {
 	color: #23250e;
 }
 
@@ -128,6 +131,20 @@ html, body {
 
 .whereState {
 	display: block;
+}
+
+.whereChartArea {
+	min-width: 500px;
+}
+
+.whereChartArea > h3 {
+	margin-top: 0px;
+	margin-bottom: 0px;
+	text-align: center;
+}
+
+.whereChartArea > h3 > small {
+	font-weight: 500;
 }
 
 /************************************/

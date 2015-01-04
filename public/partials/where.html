@@ -1,12 +1,5 @@
-<!-- Copyright IBM Corp. 2014 All Rights Reserved -->
-
 <!-- Header -->
-<div class="row">
-	<div class="page-header col-md-12">
-		<h1><img src="/images/bluemixGlobeColor32.png" / alt="Where? Logo"><span>Where?</span></h1>
-		<h3><small>IBM Bluemix-powered demo helping to answer the "where" questions of life.</small></h3>
-	</div>
-</div>
+<div ng-include src="'partials/header.html'"></div>
 
 <div class="row row-centered whereMainRow">
 	<!-- The Leaflet Map -->
@@ -181,28 +174,7 @@
 	</div>
 	
 	<!-- Footer -->
-	<div class="row">
-		<div class="footer container col-xs-12 col-sm-12 col-md-12 col-lg-12">
-			<p class="right"><strong>Backend:</strong> 
-				<a target="_blank" href="http://nodejs.org/">Node</a>, 
-				<a target="_blank" href="http://expressjs.com/">Express</a>,
-				<a target="_blank" href="http://www.pb.com">Pitney Bowes</a>,
-				<a target="_blank" href="https://cloudant.com/">Cloudant</a>
-			</p>
-			<p><strong>Runs on:</strong> <a target="_blank" href="https://www.bluemix.net">IBM Bluemix</a>  
-					<strong>Code on:</strong> <a target="_blank" href="https://github.com/aerwin/bluemix-where">Github</a></p>
-			<p class="right"><strong>Frontend:</strong> 
-				<a target="_blank" href="https://angularjs.org/">AngularJS</a>, 
-				<a target="_blank" href="http://getbootstrap.com/">Bootstrap</a>, 
-				<a target="_blank" href="http://leafletjs.com/">Leaflet.js</a>, 
-				etc.
-			</p>
-			<p><strong>Pebble App:</strong>
-				<a target="_blank" href="pebble://appstore/545e9082a9ec3be830000006">mobile link</a> 
-				(or <a target="_blank" href="https://apps.getpebble.com/applications/545e9082a9ec3be830000006">desktop</a>)</p>
-			
-		</div>
-	</div>
+	<div ng-include src="'partials/footer.html'"></div>
 </div>
 
 
