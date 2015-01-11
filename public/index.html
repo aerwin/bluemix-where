@@ -43,12 +43,19 @@
 		<!-- ng-Charts -->
 		<script src="//cdnjs.cloudflare.com/ajax/libs/line-chart/1.1.4/line-chart.min.js"></script>
 		
+		<!-- Angular Local Storage -->
+		<script src="//cdnjs.cloudflare.com/ajax/libs/angular-local-storage/0.1.5/angular-local-storage.min.js"></script>
+		
 		<!-- Our JavaScript files -->
 		<script type="text/javascript" src="js/services/geolocation.js?v20150105-2237"></script>
 		<script type="text/javascript" src="js/services/whereHttp.js?v20150105-2237"></script>
 		<script type="text/javascript" src="js/whereApp.js?v20150105-2237"></script>
 	</head>
 	<body role="document">
+		<!-- Header -->
+		<div ng-include ng-controller="HeaderController" src="'partials/header.html'"></div>
+	
+		<!-- Main view -->
 		<div data-ng-view class="container-fluid whereMain" role="main" ></div>
 	</body>
 </html>

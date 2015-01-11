@@ -1,8 +1,36 @@
 <!-- Copyright IBM Corp. 2014 All Rights Reserved -->
 
-<div class="row">
-	<div class="page-header col-md-12">
-		<h1><img src="/images/bluemixGlobeColor32.png" / alt="Where? Logo"><span>Where?</span></h1>
-		<h3><small>IBM Bluemix-powered demo helping to answer the "where" questions of life.</small></h3>
-	</div>
-</div>
+<nav class="navbar navbar-inverse">
+	<div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" ng-click="navCollapsed = !navCollapsed">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<div class="nav-brand">
+				<h1><a href="#/where"><img src="/images/bluemixGlobeColor32.png" / alt="Where? Logo"></a><span>Where?</span></h1>
+			</div>
+		</div>
+		
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" ng-class="{in: !navCollapsed}" ng-click="navCollapsed=true">
+			<ul class="nav navbar-nav">
+				<li ng-class="{active: $route.current.activeTab == 'where'}">
+					<a href="#/where">Current Location <span class="sr-only">(current)</span></a>
+				</li>
+				<li ng-class="{active: $route.current.activeTab == 'usage'}">
+					<a href="#/usage">Usage</a>
+				</li>
+			</ul>
+			
+			<div class="nav navbar-right hidden-xs hidden-sm">
+				<h3>
+					<small><em>IBM Bluemix-powered demo helping to answer the "where" questions of life.</em></small>
+				</h3>
+			</div>
+		</div><!-- /.navbar-collapse -->
+	</div><!-- /.container-fluid -->
+</nav>

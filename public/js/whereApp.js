@@ -1,17 +1,22 @@
 /* Copyright IBM Corp. 2014 All Rights Reserved                      */
 
+var cacheBustSuffix = 'v20150110-1800';
+
 var whereApp = angular.module('whereApp', [
-	'ui.bootstrap', 'ngRoute', 'leaflet-directive', 'angularSpinner', 'n3-line-chart', 'geolocation', 'whereHttp'
+	'ui.bootstrap', 'ngRoute', 'leaflet-directive', 'angularSpinner', 
+	'n3-line-chart', 'geolocation', 'LocalStorageModule', 'whereHttp'
 ]).config([
     // Make use of the where.html partial
 	'$routeProvider', function($routeProvider) {
 		$routeProvider.when('/where', {
-			templateUrl: '/partials/where.html',
-			controller: 'WhereController'
+			templateUrl: '/partials/where.html?cache-bust=' + cacheBustSuffix,
+			controller: 'WhereController',
+			activeTab: 'where'
 		}).
 		when('/usage', {
-			templateUrl: 'partials/usage.html',
-			controller: 'UsageController'
+			templateUrl: 'partials/usage.html?cache-bust=' + cacheBustSuffix,
+			controller: 'UsageController',
+			activeTab: 'usage'
 		}).
 		otherwise({
 			redirectTo: '/where'
@@ -19,12 +24,21 @@ var whereApp = angular.module('whereApp', [
 	}
 ]);
 
+// Configure local storage. Our intent is to use this so
+// we don't keep making a request for the same position when
+// URL is reloaded in same browser tab.
+whereApp.config(function(localStorageServiceProvider) {
+	localStorageServiceProvider.setPrefix('whereApp');
+	localStorageServiceProvider.setStorageType('sessionStorage');
+});
+
 whereApp.controller('WhereController', [
 	'$scope',
 	'usSpinnerService',
+	'localStorageService',
 	'geolocationService',
 	'whereHttpService',
-	function($scope, usSpinnerService, geolocationService, whereHttpService) {
+	function($scope, usSpinnerService, localStorageService, geolocationService, whereHttpService) {
 		var DEFAULT_ZOOM_LEVEL = 12;
 		var DEFAULT_SEARCH_DISTANCE = 750;
 		var WHERE_HAVE_OTHERS_BEEN_LIMIT = 15;
@@ -35,11 +49,25 @@ whereApp.controller('WhereController', [
 			 * Where am I?
 			 **********************************************************/
 			handleWhereAmI: function() {
-				// Clear our current location data
-				$scope.resetLocationData();
-				
-				// Clear any Where Am I? alert messages
-				$scope.clearWhereAmIAlert();
+				// If there are no coordinates then that means this is the first time
+				// through. Let's prime the display with info from local storage (if
+				// it exists).
+				if (!$scope.currentCoordinates) {
+					var lastResult = localStorageService.get('lastResult');
+					if (lastResult && lastResult.currentCoordinates && lastResult.currentLocation) {
+						// Put info on map
+						$scope.setCenterOfMap(lastResult.currentCoordinates);
+						
+						// Put address and such back
+						$scope.handleNewLocationPosted(lastResult.options, lastResult.currentLocation);
+					}
+				} else {
+					// Clear our current location data
+					$scope.resetLocationData();
+					
+					// Clear any Where Am I? alert messages
+					$scope.clearWhereAmIAlert();
+				}
 				
 				// Start a spinner over Where Am I? 
 				var spinnerId = 'whereAmI-spinner';
@@ -50,28 +78,7 @@ whereApp.controller('WhereController', [
 						var coords = $scope.currentCoordinates = position.coords;
 						
 						// Put info on map
-						$scope.mapCenter = {
-							lat: coords.latitude,
-							lng: coords.longitude,
-							zoom: DEFAULT_ZOOM_LEVEL
-						};
-						
-						// Add a marker
-						$scope.markers = {
-							centerMarker: {
-								lat: coords.latitude,
-								lng: coords.longitude,
-								message: 'You are here!',
-								focus: false,
-								draggable: false,
-								icon: {
-									iconUrl: 'images/map_pin25x38.png',
-									iconSize:     [25, 38], // size of the icon
-									iconAnchor:   [13, 38], // point of the icon which will correspond to marker's location
-									popupAnchor:  [0, -36] // point from which the popup should open relative to the iconAnchor
-								}
-							}
-						};
+						$scope.setCenterOfMap(coords);
 
 						// We have a good geolocation, so post it to server
 						$scope.postGeolocation();
@@ -83,35 +90,61 @@ whereApp.controller('WhereController', [
 					}
 				);
 			},
+			
+			setCenterOfMap: function(coords) {
+				// Put info on map
+				$scope.mapCenter = {
+					lat: coords.latitude,
+					lng: coords.longitude,
+					zoom: DEFAULT_ZOOM_LEVEL
+				};
+				
+				// Add a marker
+				$scope.markers = {
+					centerMarker: {
+						lat: coords.latitude,
+						lng: coords.longitude,
+						message: 'You are here!',
+						focus: false,
+						draggable: false,
+						icon: {
+							iconUrl: 'images/map_pin25x38.png',
+							iconSize:     [25, 38], // size of the icon
+							iconAnchor:   [13, 38], // point of the icon which will correspond to marker's location
+							popupAnchor:  [0, -36] // point from which the popup should open relative to the iconAnchor
+						}
+					}
+				};
+			},
 
 			postGeolocation: function() {
 				// Start a spinner over Where Am I? 
 				var spinnerId = 'whereAmI-spinner';
 				$scope.startSpin(spinnerId);
 				
+				// AWE TOOO: consult local storage
+				var lastResult = localStorageService.get('lastResult');
+				if (lastResult && lastResult.currentCoordinates && lastResult.currentLocation) {
+					var lastCurrentCoordinates = lastResult.currentCoordinates;
+					if (Math.abs(lastCurrentCoordinates.latitude - $scope.currentCoordinates.latitude) < 0.00009 &&
+						Math.abs(lastCurrentCoordinates.longitude - $scope.currentCoordinates.longitude) < 0.00009 ) {
+					
+						$scope.handleNewLocationPosted(lastResult.options, lastResult.currentLocation, spinnerId);
+						return;
+					}
+				} else {
+					localStorageService.remove('lastResult');
+				}
+				
+				// Nothing worth reusing in local stroage, so post geolocation
+				// to the server
 				var options = {
 					searchDistance: DEFAULT_SEARCH_DISTANCE,
 					coordinates: $scope.currentCoordinates
 				};
 				whereHttpService.postGeolocation(options).then(
 					function(data) {
-						// Post was successful for make note of the address data
-						$scope.currentLocation = data;
-						$scope.addressAvailable = data.address && Object.keys(data.address).length;
-						
-						// If there's no near by address, so let give user a message
-						// Show an error and stop the spinner
-						if (!$scope.addressAvailable) {
-							$scope.setWhereAmIAlert('info', 'No address within ' + options.searchDistance + ' ft.');
-						}
-
-						// Update the popular and recent lists because
-						// data just changed
-						$scope.updateWhereIsMostPopular();
-						$scope.updateWhereHaveOthersBeen();
-
-						// Stop the spinner
-						$scope.stopSpin(spinnerId);
+						$scope.handleNewLocationPosted(options, data, spinnerId);
 					},
 					function(err) {
 						// Show an error and stop the spinner
@@ -120,6 +153,38 @@ whereApp.controller('WhereController', [
 						$scope.stopSpin(spinnerId);
 					}
 				);
+			},
+			
+			handleNewLocationPosted: function(options, data, spinnerId) {
+				// Post was successful for make note of the address data
+				$scope.currentLocation = data;
+				$scope.addressAvailable = data.address && Object.keys(data.address).length;
+				
+				// If there's no near by address, so let give user a message
+				// Show an error and stop the spinner
+				if (!$scope.addressAvailable) {
+					$scope.setWhereAmIAlert('info', 'No address within ' + options.searchDistance + ' ft.');
+				}
+
+				// Update the popular and recent lists because
+				// data just changed
+				$scope.updateWhereIsMostPopular();
+				$scope.updateWhereHaveOthersBeen();
+				
+				// Let's put the information in local storage.
+				if ($scope.currentCoordinates) {
+					localStorageService.set('lastResult', {
+						options: options,
+						currentCoordinates: $scope.currentCoordinates,
+						currentLocation: $scope.currentLocation,
+						addressAvailable: $scope.addressAvailable
+					});
+				}
+				
+				// Stop the spinner
+				if (spinnerId) {
+					$scope.stopSpin(spinnerId);
+				}
 			},
 
 			/***********************************************************
@@ -456,6 +521,7 @@ whereApp.controller('UsageController', [
 			 **********************************************************/
 			usageByTime: [],
 			usageyByTimeTotal: 0,
+			usageyByTimeAverage: 0,
 			usageGroupLevel: 3,
 			updateUsageByTime: function() {
 				whereHttpService.getLocationSummaryByTime($scope.usageGroupLevel).then(
@@ -472,9 +538,10 @@ whereApp.controller('UsageController', [
 							item.total = usageDataTotal;
 							
 						});
-						
+
 						$scope.usageByTime = usageData;
 						$scope.usageyByTimeTotal = usageDataTotal;
+						$scope.usageyByTimeAverage = usageDataTotal / (usageData.length || 1);
 					}
 				);
 			},
@@ -501,5 +568,19 @@ whereApp.controller('UsageController', [
 		// Kick off getting (and displaying) some usage info
 		$scope.updateUsageByTime();
 		$scope.updateUsageByDevice();
+	}
+]);
+
+
+/***************************************************
+ * Controller for Header
+ ***************************************************/
+whereApp.controller('HeaderController', [
+	'$scope',
+	'$route',
+	function($scope, $route) {
+		$scope.$route = $route;
+		
+		$scope.navCollapsed = true;
 	}
 ]);
